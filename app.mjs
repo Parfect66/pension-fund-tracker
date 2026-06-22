@@ -1,4 +1,4 @@
-// Market-Tracking ETF Data
+// Global Market ETFs
 const fundData = {
   japan: {
     id: 'japan',
@@ -6,15 +6,15 @@ const fundData = {
     isin: 'iShares MSCI Japan ETF',
     holdings: [
       { company: 'iShares Japan ETF', ticker: 'EWJ' },
-      { company: 'Toyota Motor Corporation', ticker: 'TM' },
-      { company: 'Sony Group Corporation', ticker: 'SONY' },
-      { company: 'Mitsubishi UFJ Financial', ticker: 'MUFG' },
-      { company: 'SoftBank Group Corp', ticker: 'SFTBY' },
-      { company: 'Hitachi Ltd', ticker: 'HTHIY' },
-      { company: 'Honda Motor Company', ticker: 'HMC' },
-      { company: 'Daiichi Sankyo Company', ticker: 'DSAKY' },
-      { company: 'Takeda Pharmaceutical', ticker: 'TKPYY' },
-      { company: 'Shin-Etsu Chemical', ticker: 'SHECY' }
+      { company: 'SPDR Portfolio Developed Markets ETF', ticker: 'IEMG' },
+      { company: 'Vanguard FTSE Developed Markets ETF', ticker: 'VEA' },
+      { company: 'iShares Core MSCI EAFE ETF', ticker: 'IEFA' },
+      { company: 'Schwab International Equity ETF', ticker: 'SWISX' },
+      { company: 'Vanguard Developed Markets Index Fund', ticker: 'VTIAX' },
+      { company: 'iShares MSCI World ETF', ticker: 'URTH' },
+      { company: 'SPDR Portfolio S&P 500 Composite Stock Market ETF', ticker: 'SPLG' },
+      { company: 'Vanguard Total Stock Market ETF', ticker: 'VTI' },
+      { company: 'iShares Core S&P 500 ETF', ticker: 'IVV' }
     ]
   },
   asiapac: {
@@ -22,16 +22,16 @@ const fundData = {
     name: 'South Korea Market (EWY)',
     isin: 'iShares MSCI South Korea ETF',
     holdings: [
-      { company: 'iShares Korea ETF', ticker: 'EWY' },
-      { company: 'Samsung Electronics', ticker: 'SSNLF' },
-      { company: 'SK Hynix Inc', ticker: 'SKHHY' },
-      { company: 'LG Electronics', ticker: 'LPL' },
-      { company: 'NAVER Corporation', ticker: 'NAVER' },
-      { company: 'Kakao Corporation', ticker: 'KAKOF' },
-      { company: 'Hyundai Motor Company', ticker: 'HYMTF' },
-      { company: 'Kia Corporation', ticker: 'KIMTF' },
-      { company: 'POSCO Holdings', ticker: 'PSHOF' },
-      { company: 'Korean Air Lines', ticker: 'KALAF' }
+      { company: 'iShares South Korea ETF', ticker: 'EWY' },
+      { company: 'iShares MSCI Emerging Markets ETF', ticker: 'IEMG' },
+      { company: 'Vanguard FTSE Emerging Markets ETF', ticker: 'VWO' },
+      { company: 'iShares Core MSCI Emerging Markets ETF', ticker: 'IEMG' },
+      { company: 'Schwab Emerging Markets Equity ETF', ticker: 'SCHE' },
+      { company: 'SPDR S&P Emerging Markets Dividend ETF', ticker: 'EDIV' },
+      { company: 'Xtrackers MSCI Emerging Markets ETF', ticker: 'DBEM' },
+      { company: 'ProShares UltraShort MSCI Japan', ticker: 'JDST' },
+      { company: 'iShares MSCI Global Min Vol ETF', ticker: 'ACWV' },
+      { company: 'Vanguard Global ex-U.S. Real Estate ETF', ticker: 'VGRL' }
     ]
   },
   veritas: {
@@ -40,15 +40,15 @@ const fundData = {
     isin: 'iShares MSCI Taiwan ETF',
     holdings: [
       { company: 'iShares Taiwan ETF', ticker: 'EWT' },
-      { company: 'Taiwan Semiconductor (TSMC)', ticker: 'TSM' },
-      { company: 'MediaTek Inc', ticker: 'MDTK' },
-      { company: 'Taiwan Cement', ticker: 'TCMTF' },
-      { company: 'Chunghwa Telecom', ticker: 'CHT' },
-      { company: 'First Financial Holdings', ticker: 'FFH' },
-      { company: 'Pegatron Corporation', ticker: 'PGTRF' },
-      { company: 'Lite-On Technology', ticker: 'LTONF' },
-      { company: 'Delta Electronics', ticker: 'DELT' },
-      { company: 'Taiwan Power Company', ticker: 'TAIPF' }
+      { company: 'Taiwan Semiconductor ADR', ticker: 'TSM' },
+      { company: 'iShares MSCI Semiconductors ETF', ticker: 'SOXX' },
+      { company: 'Invesco QQQ Trust', ticker: 'QQQ' },
+      { company: 'Technology Select Sector SPDR Fund', ticker: 'XLK' },
+      { company: 'iShares Global Tech ETF', ticker: 'ICSH' },
+      { company: 'Vanguard Information Technology ETF', ticker: 'VGT' },
+      { company: 'SPDR Technology Select Sector ETF', ticker: 'XLK' },
+      { company: 'iShares Global Tech ETF', ticker: 'INDY' },
+      { company: 'Ark Innovation ETF', ticker: 'ARKK' }
     ]
   },
   artemis: {
@@ -57,15 +57,15 @@ const fundData = {
     isin: 'iShares MSCI Australia ETF',
     holdings: [
       { company: 'iShares Australia ETF', ticker: 'EWA' },
-      { company: 'Commonwealth Bank of Australia', ticker: 'CBDX' },
-      { company: 'National Australia Bank', ticker: 'NABZY' },
-      { company: 'Westpac Banking Corporation', ticker: 'WBK' },
-      { company: 'BHP Group Limited', ticker: 'BHP' },
-      { company: 'Rio Tinto Limited', ticker: 'RIO' },
-      { company: 'CSL Limited', ticker: 'CSLLF' },
-      { company: 'AMP Limited', ticker: 'AMLTF' },
-      { company: 'Stockland', ticker: 'SKLTF' },
-      { company: 'Wesfarmers Limited', ticker: 'WFAOF' }
+      { company: 'BHP Group ADR', ticker: 'BHP' },
+      { company: 'Rio Tinto ADR', ticker: 'RIO' },
+      { company: 'iShares Global Materials ETF', ticker: 'MXI' },
+      { company: 'Materials Select Sector SPDR Fund', ticker: 'XLB' },
+      { company: 'SPDR S&P 500 ETF Trust', ticker: 'SPY' },
+      { company: 'Vanguard S&P 500 ETF', ticker: 'VOO' },
+      { company: 'iShares Core S&P 500 ETF', ticker: 'IVV' },
+      { company: 'SPDR Portfolio S&P 500 Value ETF', ticker: 'SPYV' },
+      { company: 'iShares U.S. Value ETF', ticker: 'IVE' }
     ]
   }
 };
