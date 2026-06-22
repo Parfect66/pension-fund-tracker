@@ -1,9 +1,5 @@
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
   const { symbol } = req.query;
-
-  if (!process.env.FINNHUB_KEY) {
-    return res.status(500).json({ error: 'FINNHUB_KEY not configured' });
-  }
 
   const allowed = [
     '7203.T', '8306.T', '6501.T', '6857.T', '9984.T', '8725.T', '8035.T', '6758.T', '8058.T', '8411.T',
@@ -12,23 +8,19 @@ module.exports = async (req, res) => {
     'NVDA', 'GOOGL', 'BNY', 'AAPL', 'GS', 'CAH', 'TRGP', 'WMT', 'AVGO', 'PH'
   ];
 
-  if (!symbol || !allowed.includes(symbol)) {
+  if (!allowed.includes(symbol)) {
     return res.status(400).json({ error: 'Invalid symbol' });
   }
 
+  const url = `https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${process.env.FINNHUB_KEY}`;
+
   try {
-    const url = `https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${process.env.FINNHUB_KEY}`;
     const response = await fetch(url);
+    if (!response.ok) throw new Error('HTTP ' + response.status);
     const data = await response.json();
-
-    if (!response.ok) {
-      return res.status(response.status).json({ error: data.error || 'Finnhub API error' });
-    }
-
     res.setHeader('Cache-Control', 's-maxage=30');
-    return res.status(200).json(data);
+    res.status(200).json(data);
   } catch (e) {
-    console.error('API Error:', e);
-    return res.status(502).json({ error: 'API request failed' });
+    res.status(502).json({ error: e.message });
   }
-};
+}
