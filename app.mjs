@@ -118,13 +118,17 @@ async function saveFundValue(fundKey, newValue) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'update', values: { [fundKey]: newValue } })
     });
-    if (res.ok) {
-      const data = await res.json();
-      if (data && !data.error) fundState = data;
+    const data = await res.json();
+    if (!res.ok || data.error) {
+      console.error('Save failed:', data);
+      setError(`Save failed: ${data.error || res.status}. Make sure Upstash Redis is connected and project has redeployed.`);
+    } else {
+      fundState = data;
+      setError('');
     }
   } catch (e) {
     console.error('Failed to save fund value:', e);
-    setError('Failed to save value - check Vercel KV is configured');
+    setError('Failed to save value: ' + e.message);
   }
   renderFundValues();
 }
