@@ -1,71 +1,71 @@
-// Pension Fund Data
+// Market-Tracking ETF Data
 const fundData = {
   japan: {
     id: 'japan',
-    name: 'SW SSgA Japan Equity Index Pn CS8',
-    isin: 'GB00B2PGH611',
+    name: 'Japan Market (EWJ)',
+    isin: 'iShares MSCI Japan ETF',
     holdings: [
-      { company: 'Toyota Motor Corporation', ticker: '7203.T' },
-      { company: 'Mitsubishi UFJ Financial Group', ticker: '8306.T' },
-      { company: 'Hitachi Ltd', ticker: '6501.T' },
-      { company: 'Advantest Corporation', ticker: '6857.T' },
-      { company: 'SoftBank Group Corp', ticker: '9984.T' },
-      { company: 'Mitsui Sumitomo Insurance Co', ticker: '8725.T' },
-      { company: 'Tokyo Electron Limited', ticker: '8035.T' },
-      { company: 'Sony Group Corporation', ticker: '6758.T' },
-      { company: 'Mitsubishi Corporation', ticker: '8058.T' },
-      { company: 'Mizuho Financial Group', ticker: '8411.T' }
+      { company: 'iShares Japan ETF', ticker: 'EWJ' },
+      { company: 'Toyota Motor Corporation', ticker: 'TM' },
+      { company: 'Sony Group Corporation', ticker: 'SONY' },
+      { company: 'Mitsubishi UFJ Financial', ticker: 'MUFG' },
+      { company: 'SoftBank Group Corp', ticker: 'SFTBY' },
+      { company: 'Hitachi Ltd', ticker: 'HTHIY' },
+      { company: 'Honda Motor Company', ticker: 'HMC' },
+      { company: 'Daiichi Sankyo Company', ticker: 'DSAKY' },
+      { company: 'Takeda Pharmaceutical', ticker: 'TKPYY' },
+      { company: 'Shin-Etsu Chemical', ticker: 'SHECY' }
     ]
   },
   asiapac: {
     id: 'asiapac',
-    name: 'SW SSgA Asia Pacific ex Japan Pn CS8',
-    isin: 'GB00B2PGH389',
+    name: 'South Korea Market (EWY)',
+    isin: 'iShares MSCI South Korea ETF',
     holdings: [
-      { company: 'Samsung Electronics Co Ltd', ticker: '005930.KS' },
-      { company: 'SK Hynix Inc', ticker: '000660.KS' },
-      { company: 'Commonwealth Bank of Australia', ticker: 'CBA.AX' },
-      { company: 'AIA Group Limited', ticker: '1299.HK' },
-      { company: 'Westpac Banking Corporation', ticker: 'WBC.AX' },
-      { company: 'DBS Group Holdings Ltd', ticker: 'D05.SI' },
-      { company: 'National Australia Bank Limited', ticker: 'NAB.AX' },
-      { company: 'Samsung Electronics (Preferred)', ticker: '005935.KS' },
-      { company: 'Australia & New Zealand Banking Group', ticker: 'ANZ.AX' },
-      { company: 'Hong Kong Exchanges & Clearing', ticker: '0388.HK' }
+      { company: 'iShares Korea ETF', ticker: 'EWY' },
+      { company: 'Samsung Electronics', ticker: 'SSNLF' },
+      { company: 'SK Hynix Inc', ticker: 'SKHHY' },
+      { company: 'LG Electronics', ticker: 'LPL' },
+      { company: 'NAVER Corporation', ticker: 'NAVER' },
+      { company: 'Kakao Corporation', ticker: 'KAKOF' },
+      { company: 'Hyundai Motor Company', ticker: 'HYMTF' },
+      { company: 'Kia Corporation', ticker: 'KIMTF' },
+      { company: 'POSCO Holdings', ticker: 'PSHOF' },
+      { company: 'Korean Air Lines', ticker: 'KALAF' }
     ]
   },
   veritas: {
     id: 'veritas',
-    name: 'SW Veritas Asian Pn CS8',
-    isin: 'GB00BYPG4T70',
+    name: 'Taiwan Market (EWT)',
+    isin: 'iShares MSCI Taiwan ETF',
     holdings: [
-      { company: 'Samsung Electronics', ticker: '005930.KS' },
-      { company: 'Taiwan Semiconductor (TSMC)', ticker: '2330.TW' },
-      { company: 'Delta Electronics', ticker: '2308.TW' },
-      { company: 'SK Hynix', ticker: '000660.KS' },
-      { company: 'Hon Precision Inc', ticker: '2354.TW' },
-      { company: 'HD Hyundai Heavy Industries', ticker: '329180.KS' },
-      { company: 'Elite Material Co Ltd', ticker: '2383.TW' },
-      { company: 'Accton Technology Corporation', ticker: '2345.TW' },
-      { company: 'MediaTek', ticker: '2454.TW' },
-      { company: 'Shengyi Technology Co Ltd-A', ticker: '600183.SS' }
+      { company: 'iShares Taiwan ETF', ticker: 'EWT' },
+      { company: 'Taiwan Semiconductor (TSMC)', ticker: 'TSM' },
+      { company: 'MediaTek Inc', ticker: 'MDTK' },
+      { company: 'Taiwan Cement', ticker: 'TCMTF' },
+      { company: 'Chunghwa Telecom', ticker: 'CHT' },
+      { company: 'First Financial Holdings', ticker: 'FFH' },
+      { company: 'Pegatron Corporation', ticker: 'PGTRF' },
+      { company: 'Lite-On Technology', ticker: 'LTONF' },
+      { company: 'Delta Electronics', ticker: 'DELT' },
+      { company: 'Taiwan Power Company', ticker: 'TAIPF' }
     ]
   },
   artemis: {
     id: 'artemis',
-    name: 'SW Artemis US Select Pn CS8',
-    isin: 'GB00BYPFY508',
+    name: 'Australia Market (EWA)',
+    isin: 'iShares MSCI Australia ETF',
     holdings: [
-      { company: 'Nvidia Corp', ticker: 'NVDA' },
-      { company: 'Alphabet Class A', ticker: 'GOOGL' },
-      { company: 'Bank of New York Mellon', ticker: 'BNY' },
-      { company: 'Apple Inc', ticker: 'AAPL' },
-      { company: 'Goldman Sachs Group', ticker: 'GS' },
-      { company: 'Cardinal Health', ticker: 'CAH' },
-      { company: 'Targa Resources Corp', ticker: 'TRGP' },
-      { company: 'Walmart Inc', ticker: 'WMT' },
-      { company: 'Broadcom Inc', ticker: 'AVGO' },
-      { company: 'Parker-Hannifin Corp', ticker: 'PH' }
+      { company: 'iShares Australia ETF', ticker: 'EWA' },
+      { company: 'Commonwealth Bank of Australia', ticker: 'CBDX' },
+      { company: 'National Australia Bank', ticker: 'NABZY' },
+      { company: 'Westpac Banking Corporation', ticker: 'WBK' },
+      { company: 'BHP Group Limited', ticker: 'BHP' },
+      { company: 'Rio Tinto Limited', ticker: 'RIO' },
+      { company: 'CSL Limited', ticker: 'CSLLF' },
+      { company: 'AMP Limited', ticker: 'AMLTF' },
+      { company: 'Stockland', ticker: 'SKLTF' },
+      { company: 'Wesfarmers Limited', ticker: 'WFAOF' }
     ]
   }
 };
