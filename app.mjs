@@ -1,71 +1,71 @@
-// Global Market ETFs
+// Scottish Widows Pension Fund Holdings
 const fundData = {
   japan: {
     id: 'japan',
-    name: 'Japan Market (EWJ)',
-    isin: 'iShares MSCI Japan ETF',
+    name: 'SW SSgA Japan Equity Index Pn CS8',
+    isin: 'GB00B2PGH611',
     holdings: [
-      { company: 'iShares Japan ETF', ticker: 'EWJ' },
-      { company: 'SPDR Portfolio Developed Markets ETF', ticker: 'IEMG' },
-      { company: 'Vanguard FTSE Developed Markets ETF', ticker: 'VEA' },
-      { company: 'iShares Core MSCI EAFE ETF', ticker: 'IEFA' },
-      { company: 'Schwab International Equity ETF', ticker: 'SWISX' },
-      { company: 'Vanguard Developed Markets Index Fund', ticker: 'VTIAX' },
-      { company: 'iShares MSCI World ETF', ticker: 'URTH' },
-      { company: 'SPDR Portfolio S&P 500 Composite Stock Market ETF', ticker: 'SPLG' },
-      { company: 'Vanguard Total Stock Market ETF', ticker: 'VTI' },
-      { company: 'iShares Core S&P 500 ETF', ticker: 'IVV' }
+      { company: 'Toyota Motor Corporation', ticker: '7203.T' },
+      { company: 'Mitsubishi UFJ Financial Group', ticker: '8306.T' },
+      { company: 'Hitachi Ltd', ticker: '6501.T' },
+      { company: 'Advantest Corporation', ticker: '6857.T' },
+      { company: 'SoftBank Group Corp', ticker: '9984.T' },
+      { company: 'Mitsui Sumitomo Insurance Co', ticker: '8725.T' },
+      { company: 'Tokyo Electron Limited', ticker: '8035.T' },
+      { company: 'Sony Group Corporation', ticker: '6758.T' },
+      { company: 'Mitsubishi Corporation', ticker: '8058.T' },
+      { company: 'Mizuho Financial Group', ticker: '8411.T' }
     ]
   },
   asiapac: {
     id: 'asiapac',
-    name: 'South Korea Market (EWY)',
-    isin: 'iShares MSCI South Korea ETF',
+    name: 'SW SSgA Asia Pacific ex Japan Pn CS8',
+    isin: 'GB00B2PGH389',
     holdings: [
-      { company: 'iShares South Korea ETF', ticker: 'EWY' },
-      { company: 'iShares MSCI Emerging Markets ETF', ticker: 'IEMG' },
-      { company: 'Vanguard FTSE Emerging Markets ETF', ticker: 'VWO' },
-      { company: 'iShares Core MSCI Emerging Markets ETF', ticker: 'IEMG' },
-      { company: 'Schwab Emerging Markets Equity ETF', ticker: 'SCHE' },
-      { company: 'SPDR S&P Emerging Markets Dividend ETF', ticker: 'EDIV' },
-      { company: 'Xtrackers MSCI Emerging Markets ETF', ticker: 'DBEM' },
-      { company: 'ProShares UltraShort MSCI Japan', ticker: 'JDST' },
-      { company: 'iShares MSCI Global Min Vol ETF', ticker: 'ACWV' },
-      { company: 'Vanguard Global ex-U.S. Real Estate ETF', ticker: 'VGRL' }
+      { company: 'Samsung Electronics Co Ltd', ticker: '005930.KS' },
+      { company: 'SK Hynix Inc', ticker: '000660.KS' },
+      { company: 'Commonwealth Bank of Australia', ticker: 'CBA.AX' },
+      { company: 'AIA Group Limited', ticker: '1299.HK' },
+      { company: 'Westpac Banking Corporation', ticker: 'WBC.AX' },
+      { company: 'DBS Group Holdings Ltd', ticker: 'D05.SI' },
+      { company: 'National Australia Bank Limited', ticker: 'NAB.AX' },
+      { company: 'Samsung Electronics (Preferred)', ticker: '005935.KS' },
+      { company: 'Australia & New Zealand Banking Group', ticker: 'ANZ.AX' },
+      { company: 'Hong Kong Exchanges & Clearing', ticker: '0388.HK' }
     ]
   },
   veritas: {
     id: 'veritas',
-    name: 'Taiwan Market (EWT)',
-    isin: 'iShares MSCI Taiwan ETF',
+    name: 'SW Veritas Asian Pn CS8',
+    isin: 'GB00BYPG4T70',
     holdings: [
-      { company: 'iShares Taiwan ETF', ticker: 'EWT' },
-      { company: 'Taiwan Semiconductor ADR', ticker: 'TSM' },
-      { company: 'iShares MSCI Semiconductors ETF', ticker: 'SOXX' },
-      { company: 'Invesco QQQ Trust', ticker: 'QQQ' },
-      { company: 'Technology Select Sector SPDR Fund', ticker: 'XLK' },
-      { company: 'iShares Global Tech ETF', ticker: 'ICSH' },
-      { company: 'Vanguard Information Technology ETF', ticker: 'VGT' },
-      { company: 'SPDR Technology Select Sector ETF', ticker: 'XLK' },
-      { company: 'iShares Global Tech ETF', ticker: 'INDY' },
-      { company: 'Ark Innovation ETF', ticker: 'ARKK' }
+      { company: 'Samsung Electronics', ticker: '005930.KS' },
+      { company: 'Taiwan Semiconductor (TSMC)', ticker: '2330.TW' },
+      { company: 'Delta Electronics', ticker: '2308.TW' },
+      { company: 'SK Hynix', ticker: '000660.KS' },
+      { company: 'Hon Precision Inc', ticker: '2354.TW' },
+      { company: 'HD Hyundai Heavy Industries', ticker: '329180.KS' },
+      { company: 'Elite Material Co Ltd', ticker: '2383.TW' },
+      { company: 'Accton Technology Corporation', ticker: '2345.TW' },
+      { company: 'MediaTek', ticker: '2454.TW' },
+      { company: 'Shengyi Technology Co Ltd-A', ticker: '600183.SS' }
     ]
   },
   artemis: {
     id: 'artemis',
-    name: 'Australia Market (EWA)',
-    isin: 'iShares MSCI Australia ETF',
+    name: 'SW Artemis US Select Pn CS8',
+    isin: 'GB00BYPFY508',
     holdings: [
-      { company: 'iShares Australia ETF', ticker: 'EWA' },
-      { company: 'BHP Group ADR', ticker: 'BHP' },
-      { company: 'Rio Tinto ADR', ticker: 'RIO' },
-      { company: 'iShares Global Materials ETF', ticker: 'MXI' },
-      { company: 'Materials Select Sector SPDR Fund', ticker: 'XLB' },
-      { company: 'SPDR S&P 500 ETF Trust', ticker: 'SPY' },
-      { company: 'Vanguard S&P 500 ETF', ticker: 'VOO' },
-      { company: 'iShares Core S&P 500 ETF', ticker: 'IVV' },
-      { company: 'SPDR Portfolio S&P 500 Value ETF', ticker: 'SPYV' },
-      { company: 'iShares U.S. Value ETF', ticker: 'IVE' }
+      { company: 'Nvidia Corp', ticker: 'NVDA' },
+      { company: 'Alphabet Class A', ticker: 'GOOGL' },
+      { company: 'Bank of New York Mellon', ticker: 'BNY' },
+      { company: 'Apple Inc', ticker: 'AAPL' },
+      { company: 'Goldman Sachs Group', ticker: 'GS' },
+      { company: 'Cardinal Health', ticker: 'CAH' },
+      { company: 'Targa Resources Corp', ticker: 'TRGP' },
+      { company: 'Walmart Inc', ticker: 'WMT' },
+      { company: 'Broadcom Inc', ticker: 'AVGO' },
+      { company: 'Parker-Hannifin Corp', ticker: 'PH' }
     ]
   }
 };
