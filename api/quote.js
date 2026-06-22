@@ -1,5 +1,12 @@
-async function fetchMarketstackBatch(symbols) {
-  const url = `https://api.marketstack.com/v2/eod?symbols=${encodeURIComponent(symbols)}&access_key=${process.env.MARKETSTACK_KEY}&limit=1000&sort=DESC`;
+// Convert original ticker (with periods) to Marketstack API format (with hyphens)
+function toApiSymbol(ticker) {
+  return ticker.replace(/\./g, '-');
+}
+
+async function fetchMarketstackBatch(originalSymbols) {
+  // Convert all symbols to hyphen format for the API call
+  const apiSymbols = originalSymbols.map(toApiSymbol).join(',');
+  const url = `https://api.marketstack.com/v2/eod?symbols=${encodeURIComponent(apiSymbols)}&access_key=${process.env.MARKETSTACK_KEY}&limit=1000&sort=DESC`;
   const response = await fetch(url);
   const data = await response.json();
   if (!response.ok || data.error) {
@@ -11,16 +18,21 @@ async function fetchMarketstackBatch(symbols) {
   return data.data;
 }
 
-function buildResult(symbolList, records) {
+function buildResult(originalSymbols, records) {
+  // Build a map: API-format symbol -> original ticker
+  const apiToOriginal = {};
+  originalSymbols.forEach(t => { apiToOriginal[toApiSymbol(t)] = t; });
+
   const bySymbol = {};
   for (const record of records) {
-    const sym = record.symbol;
-    if (!bySymbol[sym]) bySymbol[sym] = [];
-    bySymbol[sym].push(record);
+    const apiSym = record.symbol;
+    const origSym = apiToOriginal[apiSym] || apiSym;
+    if (!bySymbol[origSym]) bySymbol[origSym] = [];
+    bySymbol[origSym].push(record);
   }
 
   const result = {};
-  for (const ticker of symbolList) {
+  for (const ticker of originalSymbols) {
     const recs = bySymbol[ticker];
     if (recs && recs.length > 0) {
       const latest = recs[0];
@@ -48,7 +60,7 @@ export default async function handler(req, res) {
 
   try {
     // Try batched call first (fast, one request)
-    const records = await fetchMarketstackBatch(symbols);
+    const records = await fetchMarketstackBatch(symbolList);
     const result = buildResult(symbolList, records);
     res.setHeader('Cache-Control', 's-maxage=3600');
     return res.status(200).json(result);
@@ -59,7 +71,7 @@ export default async function handler(req, res) {
     const result = {};
     await Promise.all(symbolList.map(async (ticker) => {
       try {
-        const records = await fetchMarketstackBatch(ticker);
+        const records = await fetchMarketstackBatch([ticker]);
         const single = buildResult([ticker], records);
         result[ticker] = single[ticker];
       } catch (e) {
