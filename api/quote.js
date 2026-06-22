@@ -12,19 +12,25 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid symbol' });
   }
 
-  const url = `https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${process.env.FINNHUB_KEY}`;
+  const url = `https://api.twelvedata.com/quote?symbol=${symbol}&apikey=${process.env.TWELVE_DATA_KEY}`;
 
   try {
     const response = await fetch(url);
     const data = await response.json();
 
-    if (!response.ok) {
-      console.error(`Finnhub error for ${symbol}:`, data);
-      throw new Error(`Finnhub API: ${data.error || 'HTTP ' + response.status}`);
+    if (data.status === 'error' || !data.close) {
+      console.error(`Twelve Data error for ${symbol}:`, data);
+      throw new Error(`Twelve Data API: ${data.message || 'No data'}`);
     }
 
+    const finnhubFormat = {
+      c: parseFloat(data.close),
+      pc: parseFloat(data.previous_close),
+      t: Math.floor(new Date(data.datetime).getTime() / 1000)
+    };
+
     res.setHeader('Cache-Control', 's-maxage=30');
-    res.status(200).json(data);
+    res.status(200).json(finnhubFormat);
   } catch (e) {
     console.error(`Quote error for ${symbol}:`, e.message);
     res.status(502).json({ error: e.message });
