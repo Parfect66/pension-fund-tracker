@@ -16,11 +16,17 @@ export default async function handler(req, res) {
 
   try {
     const response = await fetch(url);
-    if (!response.ok) throw new Error('HTTP ' + response.status);
     const data = await response.json();
+
+    if (!response.ok) {
+      console.error(`Finnhub error for ${symbol}:`, data);
+      throw new Error(`Finnhub API: ${data.error || 'HTTP ' + response.status}`);
+    }
+
     res.setHeader('Cache-Control', 's-maxage=30');
     res.status(200).json(data);
   } catch (e) {
+    console.error(`Quote error for ${symbol}:`, e.message);
     res.status(502).json({ error: e.message });
   }
 }
