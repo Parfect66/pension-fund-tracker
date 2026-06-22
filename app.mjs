@@ -70,6 +70,135 @@ const fundData = {
   }
 };
 
+// Fund value state (loaded from /api/funds)
+let fundState = {
+  japan: { value: 0, lastApplied: null },
+  asiapac: { value: 0, lastApplied: null },
+  veritas: { value: 0, lastApplied: null },
+  artemis: { value: 0, lastApplied: null }
+};
+
+// UK time helpers
+function getUKDate() {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Europe/London',
+    year: 'numeric', month: '2-digit', day: '2-digit'
+  }).format(new Date());
+}
+
+function getUKHour() {
+  return parseInt(new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/London', hour: '2-digit', hour12: false
+  }).format(new Date()), 10);
+}
+
+function formatGBP(value) {
+  return '£' + Math.round(value || 0).toLocaleString('en-GB');
+}
+
+// Load fund values from server
+async function loadFundState() {
+  try {
+    const res = await fetch('/api/funds');
+    if (res.ok) {
+      const data = await res.json();
+      if (data && !data.error) fundState = data;
+    }
+  } catch (e) {
+    console.error('Failed to load fund state:', e);
+  }
+  renderFundValues();
+}
+
+// Save edited values to server
+async function saveFundValue(fundKey, newValue) {
+  try {
+    const res = await fetch('/api/funds', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'update', values: { [fundKey]: newValue } })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && !data.error) fundState = data;
+    }
+  } catch (e) {
+    console.error('Failed to save fund value:', e);
+    setError('Failed to save value - check Vercel KV is configured');
+  }
+  renderFundValues();
+}
+
+// Apply daily change snapshot (after 7pm UK)
+async function applyDailyChanges(percentages) {
+  try {
+    const res = await fetch('/api/funds', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'apply-daily', percentages })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.state) fundState = data.state;
+      console.log('Daily values applied:', data.applied);
+    }
+  } catch (e) {
+    console.error('Failed to apply daily changes:', e);
+  }
+  renderFundValues();
+}
+
+// Render the portfolio summary values
+function renderFundValues() {
+  let total = 0;
+  for (const key of Object.keys(fundState)) {
+    const el = document.getElementById(`${key}-value`);
+    if (el) el.textContent = formatGBP(fundState[key].value);
+    total += fundState[key].value || 0;
+  }
+  const totalEl = document.getElementById('totalValue');
+  if (totalEl) totalEl.textContent = formatGBP(total);
+}
+
+// Make a value editable - click to edit, save on Enter/blur
+function setupValueEditor(el) {
+  el.addEventListener('click', () => {
+    if (el.querySelector('input')) return;
+    const fundKey = el.dataset.fund;
+    const currentVal = fundState[fundKey]?.value || 0;
+
+    const input = document.createElement('input');
+    input.type = 'number';
+    input.className = 'fund-value-input';
+    input.value = Math.round(currentVal);
+    input.min = '0';
+    input.step = '1';
+
+    el.textContent = '';
+    el.appendChild(input);
+    input.focus();
+    input.select();
+
+    let saved = false;
+    const commit = () => {
+      if (saved) return;
+      saved = true;
+      const newVal = parseFloat(input.value);
+      if (!isNaN(newVal) && newVal >= 0) {
+        saveFundValue(fundKey, newVal);
+      } else {
+        renderFundValues();
+      }
+    };
+
+    input.addEventListener('blur', commit);
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { input.blur(); }
+      if (e.key === 'Escape') { saved = true; renderFundValues(); }
+    });
+  });
+}
+
 // UI Helpers
 function setError(msg) {
   const box = document.getElementById('errorBox');
@@ -170,6 +299,8 @@ async function renderFund(fundKey) {
 
   avgEl.textContent = formatPercent(avgChange);
   avgEl.className = getChangeClass(avgChange);
+
+  return avgChange;
 }
 
 // Refresh all funds
@@ -177,12 +308,34 @@ async function refreshAll() {
   setError('');
   console.log('Refreshing all funds...');
 
-  await Promise.all([
+  // Load saved fund values and quotes in parallel
+  const [_, ...avgs] = await Promise.all([
+    loadFundState(),
     renderFund('japan'),
     renderFund('asiapac'),
     renderFund('veritas'),
     renderFund('artemis')
   ]);
+
+  const [japanAvg, asiapacAvg, veritasAvg, artemisAvg] = avgs;
+
+  // Apply daily snapshot if past 19:00 UK and not already applied today
+  const ukHour = getUKHour();
+  const ukDate = getUKDate();
+
+  if (ukHour >= 19) {
+    const percentages = {};
+    const avgMap = { japan: japanAvg, asiapac: asiapacAvg, veritas: veritasAvg, artemis: artemisAvg };
+    for (const [fund, pct] of Object.entries(avgMap)) {
+      if (fundState[fund] && fundState[fund].lastApplied !== ukDate && pct !== null) {
+        percentages[fund] = pct;
+      }
+    }
+    if (Object.keys(percentages).length > 0) {
+      console.log('Applying daily snapshot:', percentages);
+      await applyDailyChanges(percentages);
+    }
+  }
 
   updateTimestamp();
 }
@@ -226,6 +379,9 @@ async function testApiKeys() {
 // Expose functions
 window.refreshAll = refreshAll;
 window.testApiKeys = testApiKeys;
+
+// Wire up click-to-edit on fund values
+document.querySelectorAll('.fund-value.editable').forEach(setupValueEditor);
 
 // Initial load
 refreshAll();

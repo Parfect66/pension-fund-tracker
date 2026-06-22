@@ -82,6 +82,82 @@ button:active {
   display: block;
 }
 
+.portfolio-summary {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 25px 30px;
+  margin-bottom: 30px;
+}
+
+.portfolio-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  font-size: 1.05em;
+}
+
+.portfolio-row:first-child {
+  border-bottom: 2px solid #ecf0f1;
+  padding-bottom: 15px;
+  margin-bottom: 5px;
+  font-weight: 700;
+  font-size: 1.4em;
+}
+
+.portfolio-row.sub-row {
+  padding: 8px 0;
+  font-size: 1em;
+}
+
+.portfolio-label {
+  color: #2c3e50;
+}
+
+.portfolio-value {
+  font-weight: 700;
+  color: #2c3e50;
+  font-family: 'Segoe UI', sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+
+.fund-value {
+  font-weight: 600;
+  color: #2c3e50;
+  font-variant-numeric: tabular-nums;
+}
+
+.fund-value.editable {
+  cursor: pointer;
+  padding: 4px 10px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.fund-value.editable:hover {
+  background: #ecf0f1;
+}
+
+.fund-value-input {
+  font: inherit;
+  font-weight: 600;
+  color: #2c3e50;
+  border: 2px solid #3498db;
+  border-radius: 4px;
+  padding: 2px 8px;
+  width: 120px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.portfolio-hint {
+  font-size: 0.85em;
+  color: #7f8c8d;
+  margin-top: 10px;
+  font-style: italic;
+}
+
 .dashboard-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
