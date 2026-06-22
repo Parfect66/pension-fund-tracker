@@ -16,15 +16,29 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid symbol' });
   }
 
-  const url = `https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${process.env.FINNHUB_KEY}`;
-
   try {
+    const url = `https://api.marketstack.com/v2/eod?symbols=${symbol}&access_key=${process.env.MARKETSTACK_KEY}&limit=2`;
     const response = await fetch(url);
     if (!response.ok) throw new Error('HTTP ' + response.status);
     const data = await response.json();
-    res.setHeader('Cache-Control', 's-maxage=30');
-    res.status(200).json(data);
+
+    if (!data.data || data.data.length === 0) {
+      throw new Error('No data available');
+    }
+
+    const latest = data.data[0];
+    const previous = data.data.length > 1 ? data.data[1] : latest;
+
+    const finnhubFormat = {
+      c: latest.adj_close || latest.close,
+      pc: previous.adj_close || previous.close,
+      t: Math.floor(new Date(latest.date).getTime() / 1000)
+    };
+
+    res.setHeader('Cache-Control', 's-maxage=3600');
+    res.status(200).json(finnhubFormat);
   } catch (e) {
+    console.error(`Quote error for ${symbol}:`, e.message);
     res.status(502).json({ error: e.message });
   }
 }
