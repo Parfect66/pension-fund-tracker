@@ -12,21 +12,22 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid symbol' });
   }
 
-  const url = `https://api.twelvedata.com/quote?symbol=${symbol}&apikey=${process.env.TWELVE_DATA_KEY}`;
+  const url = `https://financialmodelingprep.com/api/v3/quote/${symbol}?apikey=${process.env.FMP_KEY}`;
 
   try {
     const response = await fetch(url);
     const data = await response.json();
 
-    if (data.status === 'error' || !data.close) {
-      console.error(`Twelve Data error for ${symbol}:`, data);
-      throw new Error(`Twelve Data API: ${data.message || 'No data'}`);
+    if (!data || !data[0] || !data[0].price) {
+      console.error(`FMP error for ${symbol}:`, data);
+      throw new Error(`No data available for ${symbol}`);
     }
 
+    const quote = data[0];
     const finnhubFormat = {
-      c: parseFloat(data.close),
-      pc: parseFloat(data.previous_close),
-      t: Math.floor(new Date(data.datetime).getTime() / 1000)
+      c: parseFloat(quote.price),
+      pc: parseFloat(quote.previousClose),
+      t: Math.floor(new Date(quote.timestamp * 1000).getTime() / 1000)
     };
 
     res.setHeader('Cache-Control', 's-maxage=30');
