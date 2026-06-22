@@ -198,10 +198,10 @@ async function testApiKeys() {
   statusEl.textContent = 'Testing…';
 
   const tests = [
-    { name: 'Finnhub quote (NVDA)', ticker: 'NVDA' },
-    { name: 'Finnhub quote (7203.T)', ticker: '7203.T' },
-    { name: 'Finnhub quote (005930.KS)', ticker: '005930.KS' },
-    { name: 'Finnhub quote (2330.TW)', ticker: '2330.TW' }
+    { name: 'Stock quote (NVDA)', ticker: 'NVDA' },
+    { name: 'Stock quote (7203.T)', ticker: '7203.T' },
+    { name: 'Stock quote (005930.KS)', ticker: '005930.KS' },
+    { name: 'Stock quote (2330.TW)', ticker: '2330.TW' }
   ];
 
   const results = await Promise.all(tests.map(async t => {
