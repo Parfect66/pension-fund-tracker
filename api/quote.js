@@ -12,13 +12,13 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid symbol' });
   }
 
-  const url = `https://financialmodelingprep.com/api/v3/quote/${symbol}?apikey=${process.env.FMP_KEY}`;
+  const url = `https://financialmodelingprep.com/stable/quote?symbol=${symbol}&apikey=${process.env.FMP_KEY}`;
 
   try {
     const response = await fetch(url);
     const data = await response.json();
 
-    if (!data || !data[0] || !data[0].price) {
+    if (!data || !data[0] || typeof data[0].price !== 'number') {
       console.error(`FMP error for ${symbol}:`, data);
       throw new Error(`No data available for ${symbol}`);
     }
@@ -26,8 +26,8 @@ export default async function handler(req, res) {
     const quote = data[0];
     const finnhubFormat = {
       c: parseFloat(quote.price),
-      pc: parseFloat(quote.previousClose),
-      t: Math.floor(new Date(quote.timestamp * 1000).getTime() / 1000)
+      pc: parseFloat(quote.previousClose || quote.price),
+      t: Math.floor(Date.now() / 1000)
     };
 
     res.setHeader('Cache-Control', 's-maxage=30');
