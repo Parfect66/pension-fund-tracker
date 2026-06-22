@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pension Fund Tracker</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+<div class="container">
+  <h1>Pension Fund Tracker</h1>
+  <p class="subtitle">Scottish Widows pension fund holdings – live stock performance from Finnhub</p>
+
+  <div class="controls">
+    <button onclick="refreshAll()">Refresh Data</button>
+    <button onclick="testApiKeys()">Test API Keys</button>
+    <span id="lastUpdated" class="timestamp"></span>
+  </div>
+
+  <div id="errorBox" class="error-box"></div>
+
+  <div class="dashboard-grid">
+    <div class="fund-column">
+      <div class="column-header">
+        <h2>SW SSgA Japan Equity</h2>
+        <div class="isin">GB00B2PGH611</div>
+      </div>
+      <div class="holdings" id="japan-holdings"></div>
+      <div class="column-footer">
+        <div class="average-label">Top 10 Average</div>
+        <div class="average-value" id="japan-avg">–</div>
+      </div>
+    </div>
+
+    <div class="fund-column">
+      <div class="column-header">
+        <h2>SW SSgA Asia Pacific ex Japan</h2>
+        <div class="isin">GB00B2PGH389</div>
+      </div>
+      <div class="holdings" id="asiapac-holdings"></div>
+      <div class="column-footer">
+        <div class="average-label">Top 10 Average</div>
+        <div class="average-value" id="asiapac-avg">–</div>
+      </div>
+    </div>
+
+    <div class="fund-column">
+      <div class="column-header">
+        <h2>SW Veritas Asian</h2>
+        <div class="isin">GB00BYPG4T70</div>
+      </div>
+      <div class="holdings" id="veritas-holdings"></div>
+      <div class="column-footer">
+        <div class="average-label">Top 10 Average</div>
+        <div class="average-value" id="veritas-avg">–</div>
+      </div>
+    </div>
+
+    <div class="fund-column">
+      <div class="column-header">
+        <h2>SW Artemis US Select</h2>
+        <div class="isin">GB00BYPFY508</div>
+      </div>
+      <div class="holdings" id="artemis-holdings"></div>
+      <div class="column-footer">
+        <div class="average-label">Top 10 Average</div>
+        <div class="average-value" id="artemis-avg">–</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="apiStatus"></div>
+</div>
+
+<script type="module" src="app.mjs"></script>
+</body>
+</html>
