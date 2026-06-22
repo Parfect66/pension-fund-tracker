@@ -25,7 +25,9 @@ async function fetchYahooQuote(symbol) {
 
   const meta = result.meta;
   const price = meta.regularMarketPrice;
-  const prevClose = meta.chartPreviousClose ?? meta.previousClose;
+  // previousClose = most recent prior trading day close (what we want for daily % change)
+  // chartPreviousClose = close at start of the requested chart range (5d ago - inflates change)
+  const prevClose = meta.previousClose ?? meta.chartPreviousClose;
 
   if (typeof price !== 'number' || typeof prevClose !== 'number') {
     throw new Error('Missing price data');
