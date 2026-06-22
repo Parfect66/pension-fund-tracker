@@ -25,9 +25,22 @@ async function fetchYahooQuote(symbol) {
 
   const meta = result.meta;
   const price = meta.regularMarketPrice;
-  // previousClose = most recent prior trading day close (what we want for daily % change)
-  // chartPreviousClose = close at start of the requested chart range (5d ago - inflates change)
-  const prevClose = meta.previousClose ?? meta.chartPreviousClose;
+
+  // Find previous close from the actual daily closes array (most reliable)
+  // closes[last] = today's close (or current intraday), closes[last-1] = yesterday's close
+  let prevClose = null;
+  const closes = result.indicators?.quote?.[0]?.close;
+  if (Array.isArray(closes)) {
+    const validCloses = closes.filter(c => typeof c === 'number');
+    if (validCloses.length >= 2) {
+      prevClose = validCloses[validCloses.length - 2];
+    }
+  }
+
+  // Fallback to meta fields if chart array didn't yield enough data
+  if (prevClose === null) {
+    prevClose = meta.previousClose ?? meta.chartPreviousClose;
+  }
 
   if (typeof price !== 'number' || typeof prevClose !== 'number') {
     throw new Error('Missing price data');
