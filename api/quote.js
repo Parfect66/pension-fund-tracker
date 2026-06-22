@@ -17,7 +17,10 @@ export default async function handler(req, res) {
   }
 
   try {
-    const url = `https://api.marketstack.com/v2/eod?symbols=${symbol}&access_key=${process.env.MARKETSTACK_KEY}&limit=2`;
+    // Marketstack requires periods in symbols to be replaced with hyphens
+    const apiSymbol = symbol.replace(/\./g, '-');
+    const url = `https://api.marketstack.com/v2/eod?symbols=${apiSymbol}&access_key=${process.env.MARKETSTACK_KEY}&limit=2`;
+
     const response = await fetch(url);
     if (!response.ok) throw new Error('HTTP ' + response.status);
     const data = await response.json();
