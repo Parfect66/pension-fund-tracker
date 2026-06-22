@@ -50,37 +50,41 @@ function buildResult(originalSymbols, records) {
 }
 
 export default async function handler(req, res) {
-  const { symbols } = req.query;
+  const { symbols, debug } = req.query;
 
   if (!symbols) {
     return res.status(400).json({ error: 'Missing symbols parameter' });
   }
 
   const symbolList = symbols.split(',');
+  const errors = [];
 
   try {
-    // Try batched call first (fast, one request)
     const records = await fetchMarketstackBatch(symbolList);
     const result = buildResult(symbolList, records);
     res.setHeader('Cache-Control', 's-maxage=3600');
-    return res.status(200).json(result);
+    return res.status(200).json(debug ? { result, errors: [] } : result);
   } catch (batchErr) {
+    errors.push({ stage: 'batch', message: batchErr.message });
     console.warn('Batch failed, falling back to individual calls:', batchErr.message);
 
-    // Fallback: fetch each symbol individually so one bad symbol doesn't kill the whole batch
     const result = {};
     await Promise.all(symbolList.map(async (ticker) => {
       try {
         const records = await fetchMarketstackBatch([ticker]);
         const single = buildResult([ticker], records);
         result[ticker] = single[ticker];
+        if (!result[ticker]) {
+          errors.push({ stage: 'individual', ticker, message: 'No data returned' });
+        }
       } catch (e) {
+        errors.push({ stage: 'individual', ticker, message: e.message });
         console.error(`Individual fetch failed for ${ticker}:`, e.message);
         result[ticker] = null;
       }
     }));
 
     res.setHeader('Cache-Control', 's-maxage=3600');
-    return res.status(200).json(result);
+    return res.status(200).json(debug ? { result, errors } : result);
   }
 }
