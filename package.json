@@ -1,7 +1,7 @@
 {
   "name": "pension-fund-tracker",
   "version": "1.0.0",
-  "description": "Real-time pension fund tracker with Finnhub stock quotes",
+  "description": "Real-time pension fund tracker with Yahoo Finance quotes",
   "main": "index.html",
   "type": "module",
   "scripts": {
