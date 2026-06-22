@@ -86,21 +86,17 @@ function updateTimestamp() {
     'Last updated: ' + new Date().toLocaleString();
 }
 
-// Fetch stock quote
-async function fetchQuote(ticker) {
+// Fetch all quotes for a fund in a single batched API call
+async function fetchFundQuotes(tickers) {
   try {
-    const res = await fetch(`/api/quote?symbol=${ticker}`);
+    const symbols = tickers.join(',');
+    const res = await fetch(`/api/quote?symbols=${encodeURIComponent(symbols)}`);
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
-    if (!data || typeof data.c !== 'number') throw new Error('Invalid quote');
-    return {
-      price: data.c,
-      previousClose: data.pc,
-      timestamp: data.t
-    };
+    return data; // { ticker: { c, pc, t } | null }
   } catch (e) {
-    console.error(`Error fetching ${ticker}:`, e);
-    return null;
+    console.error('Batch fetch error:', e);
+    return {};
   }
 }
 
@@ -134,15 +130,14 @@ async function renderFund(fundKey) {
   holdingsEl.innerHTML = '';
   let changes = [];
 
-  // Fetch all quotes in parallel
-  const quotes = await Promise.all(
-    fund.holdings.map(h => fetchQuote(h.ticker))
-  );
+  // Fetch all quotes in a single batched API call
+  const tickers = fund.holdings.map(h => h.ticker);
+  const quotesMap = await fetchFundQuotes(tickers);
 
   // Render each holding
-  quotes.forEach((quote, idx) => {
-    const holding = fund.holdings[idx];
-    const change = quote ? calculateChange(quote.price, quote.previousClose) : null;
+  fund.holdings.forEach((holding) => {
+    const quote = quotesMap[holding.ticker];
+    const change = quote ? calculateChange(quote.c, quote.pc) : null;
     changes.push(change);
 
     const row = document.createElement('div');
@@ -206,10 +201,11 @@ async function testApiKeys() {
 
   const results = await Promise.all(tests.map(async t => {
     try {
-      const res = await fetch(`/api/quote?symbol=${t.ticker}`);
+      const res = await fetch(`/api/quote?symbols=${encodeURIComponent(t.ticker)}`);
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const data = await res.json();
-      return { name: t.name, ok: data && typeof data.c === 'number' };
+      const quote = data[t.ticker];
+      return { name: t.name, ok: quote && typeof quote.c === 'number' };
     } catch (e) {
       return { name: t.name, ok: false, err: e.message };
     }
