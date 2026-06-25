@@ -14,7 +14,7 @@
     "funds",
     "stocks",
     "tracker",
-    "finnhub"
+    "yahoo-finance"
   ],
   "author": "stevew0766@gmail.com",
   "license": "private",
