@@ -43,7 +43,7 @@ const fundData = {
       { company: 'Taiwan Semiconductor (TSMC)', ticker: '2330.TW' },
       { company: 'Delta Electronics', ticker: '2308.TW' },
       { company: 'SK Hynix', ticker: '000660.KS' },
-      { company: 'Hon Precision Inc', ticker: '2354.TW' },
+      { company: 'Hon Precision Inc', ticker: '7769.TW' },
       { company: 'HD Hyundai Heavy Industries', ticker: '329180.KS' },
       { company: 'Elite Material Co Ltd', ticker: '2383.TW' },
       { company: 'Accton Technology Corporation', ticker: '2345.TW' },
