@@ -327,7 +327,7 @@ async function refreshAll() {
   const ukHour = getUKHour();
   const ukDate = getUKDate();
 
-  if (ukHour >= 19) {
+  if (ukHour >= 10) {
     const percentages = {};
     const avgMap = { japan: japanAvg, asiapac: asiapacAvg, veritas: veritasAvg, artemis: artemisAvg };
     for (const [fund, pct] of Object.entries(avgMap)) {
