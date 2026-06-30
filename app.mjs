@@ -57,7 +57,7 @@ const fundData = {
     isin: 'GB00BYPFY508',
     holdings: [
       { company: 'Nvidia Corp', ticker: 'NVDA' },
-      { company: 'Alphabet Class A', ticker: 'GOOGL' },
+      { company: 'Alphabet Class A', ticker: 'GOOG' },
       { company: 'Bank of New York Mellon', ticker: 'BNY' },
       { company: 'Apple Inc', ticker: 'AAPL' },
       { company: 'Goldman Sachs Group', ticker: 'GS' },
