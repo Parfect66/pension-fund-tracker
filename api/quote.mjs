@@ -26,20 +26,28 @@ async function fetchYahooQuote(symbol) {
   const meta = result.meta;
   const price = meta.regularMarketPrice;
 
-  // Find previous close from the actual daily closes array (most reliable)
-  // closes[last] = today's close (or current intraday), closes[last-1] = yesterday's close
-  let prevClose = null;
-  const closes = result.indicators?.quote?.[0]?.close;
-  if (Array.isArray(closes)) {
-    const validCloses = closes.filter(c => typeof c === 'number');
-    if (validCloses.length >= 2) {
-      prevClose = validCloses[validCloses.length - 2];
+  // Prefer Yahoo's authoritative previousClose - it's the same "prev close" shown on Yahoo/MSN etc.
+  // Fall back to the closes array only if that field is missing.
+  let prevClose = meta.previousClose;
+
+  if (typeof prevClose !== 'number') {
+    // Walk the daily closes and pick the last close that occurred before today's market bar.
+    const closes = result.indicators?.quote?.[0]?.close;
+    const timestamps = result.timestamp;
+    const todayTs = meta.regularMarketTime || Math.floor(Date.now() / 1000);
+    // Bars are stamped at market-day start; "today" bar's timestamp is within ~1 day of regularMarketTime.
+    if (Array.isArray(closes) && Array.isArray(timestamps)) {
+      for (let i = timestamps.length - 1; i >= 0; i--) {
+        if (typeof closes[i] === 'number' && (todayTs - timestamps[i]) > 43200) { // >12h old = a prior day
+          prevClose = closes[i];
+          break;
+        }
+      }
     }
   }
 
-  // Fallback to meta fields if chart array didn't yield enough data
-  if (prevClose === null) {
-    prevClose = meta.previousClose ?? meta.chartPreviousClose;
+  if (typeof prevClose !== 'number') {
+    prevClose = meta.chartPreviousClose;
   }
 
   if (typeof price !== 'number' || typeof prevClose !== 'number') {
