@@ -47,11 +47,16 @@ function getUKDate() {
   }).format(new Date());
 }
 
-function getUKHour() {
-  return parseInt(new Intl.DateTimeFormat('en-GB', {
-    timeZone: 'Europe/London', hour: '2-digit', hour12: false
-  }).format(new Date()), 10);
+function getUKMinutesSinceMidnight() {
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/London', hour: '2-digit', minute: '2-digit', hour12: false
+  }).formatToParts(new Date());
+  const hh = parseInt(parts.find(p => p.type === 'hour').value, 10);
+  const mm = parseInt(parts.find(p => p.type === 'minute').value, 10);
+  return hh * 60 + mm;
 }
+
+const DAILY_APPLY_MINUTE = 9 * 60 + 10; // 09:10 UK
 
 function mergeWithDefaults(state) {
   const result = { ...DEFAULT_STATE };
@@ -97,10 +102,10 @@ export default async function handler(req, res) {
 
       if (action === 'apply-daily') {
         const ukDate = getUKDate();
-        const ukHour = getUKHour();
+        const ukMinutes = getUKMinutesSinceMidnight();
 
-        if (ukHour < 19) {
-          return res.status(400).json({ error: 'Not yet 19:00 UK time' });
+        if (ukMinutes < DAILY_APPLY_MINUTE) {
+          return res.status(400).json({ error: 'Not yet 09:10 UK time' });
         }
 
         const percentages = body.percentages || {};

@@ -86,11 +86,16 @@ function getUKDate() {
   }).format(new Date());
 }
 
-function getUKHour() {
-  return parseInt(new Intl.DateTimeFormat('en-GB', {
-    timeZone: 'Europe/London', hour: '2-digit', hour12: false
-  }).format(new Date()), 10);
+function getUKMinutesSinceMidnight() {
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/London', hour: '2-digit', minute: '2-digit', hour12: false
+  }).formatToParts(new Date());
+  const hh = parseInt(parts.find(p => p.type === 'hour').value, 10);
+  const mm = parseInt(parts.find(p => p.type === 'minute').value, 10);
+  return hh * 60 + mm;
 }
+
+const DAILY_APPLY_MINUTE = 9 * 60 + 10; // 09:10 UK
 
 function formatGBP(value) {
   return '£' + Math.round(value || 0).toLocaleString('en-GB');
@@ -323,11 +328,11 @@ async function refreshAll() {
 
   const [japanAvg, asiapacAvg, veritasAvg, artemisAvg] = avgs;
 
-  // Apply daily snapshot if past 19:00 UK and not already applied today
-  const ukHour = getUKHour();
+  // Apply daily snapshot if past 09:10 UK and not already applied today
+  const ukMinutes = getUKMinutesSinceMidnight();
   const ukDate = getUKDate();
 
-  if (ukHour >= 10) {
+  if (ukMinutes >= DAILY_APPLY_MINUTE) {
     const percentages = {};
     const avgMap = { japan: japanAvg, asiapac: asiapacAvg, veritas: veritasAvg, artemis: artemisAvg };
     for (const [fund, pct] of Object.entries(avgMap)) {
