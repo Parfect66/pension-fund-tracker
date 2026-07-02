@@ -10,7 +10,7 @@ const fundData = {
       { company: 'Hitachi Ltd', ticker: '6501.T' },
       { company: 'Advantest Corporation', ticker: '6857.T' },
       { company: 'SoftBank Group Corp', ticker: '9984.T' },
-      { company: 'Mitsui Sumitomo Insurance Co', ticker: '8725.T' },
+      { company: 'Forval Corporation', ticker: '8275.T' },
       { company: 'Tokyo Electron Limited', ticker: '8035.T' },
       { company: 'Sony Group Corporation', ticker: '6758.T' },
       { company: 'Mitsubishi Corporation', ticker: '8058.T' },
