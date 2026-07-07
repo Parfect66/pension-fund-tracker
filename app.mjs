@@ -1,82 +1,13 @@
-// Scottish Widows Pension Fund Holdings
-const fundData = {
-  japan: {
-    id: 'japan',
-    name: 'SW SSgA Japan Equity Index Pn CS8',
-    isin: 'GB00B2PGH611',
-    holdings: [
-      { company: 'Toyota Motor Corporation', ticker: '7203.T' },
-      { company: 'Mitsubishi UFJ Financial Group', ticker: '8306.T' },
-      { company: 'Hitachi Ltd', ticker: '6501.T' },
-      { company: 'Advantest Corporation', ticker: '6857.T' },
-      { company: 'SoftBank Group Corp', ticker: '9984.T' },
-      { company: 'Forval Corporation', ticker: '8275.T' },
-      { company: 'Tokyo Electron Limited', ticker: '8035.T' },
-      { company: 'Sony Group Corporation', ticker: '6758.T' },
-      { company: 'Mitsubishi Corporation', ticker: '8058.T' },
-      { company: 'Mizuho Financial Group', ticker: '8411.T' }
-    ]
-  },
-  asiapac: {
-    id: 'asiapac',
-    name: 'SW SSgA Asia Pacific ex Japan Pn CS8',
-    isin: 'GB00B2PGH389',
-    holdings: [
-      { company: 'Samsung Electronics Co Ltd', ticker: '005930.KS' },
-      { company: 'SK Hynix Inc', ticker: '000660.KS' },
-      { company: 'Commonwealth Bank of Australia', ticker: 'CBA.AX' },
-      { company: 'AIA Group Limited', ticker: '1299.HK' },
-      { company: 'Westpac Banking Corporation', ticker: 'WBC.AX' },
-      { company: 'DBS Group Holdings Ltd', ticker: 'D05.SI' },
-      { company: 'National Australia Bank Limited', ticker: 'NAB.AX' },
-      { company: 'Samsung Electronics (Preferred)', ticker: '005935.KS' },
-      { company: 'Australia & New Zealand Banking Group', ticker: 'ANZ.AX' },
-      { company: 'Hong Kong Exchanges & Clearing', ticker: '0388.HK' }
-    ]
-  },
-  veritas: {
-    id: 'veritas',
-    name: 'SW Veritas Asian Pn CS8',
-    isin: 'GB00BYPG4T70',
-    holdings: [
-      { company: 'Samsung Electronics', ticker: '005930.KS' },
-      { company: 'Taiwan Semiconductor (TSMC)', ticker: '2330.TW' },
-      { company: 'Delta Electronics', ticker: '2308.TW' },
-      { company: 'SK Hynix', ticker: '000660.KS' },
-      { company: 'Hon Precision Inc', ticker: '7769.TW' },
-      { company: 'HD Hyundai Heavy Industries', ticker: '329180.KS' },
-      { company: 'Elite Material Co Ltd', ticker: '2383.TW' },
-      { company: 'Accton Technology Corporation', ticker: '2345.TW' },
-      { company: 'MediaTek', ticker: '2454.TW' },
-      { company: 'Shengyi Technology Co Ltd-A', ticker: '600183.SS' }
-    ]
-  },
-  artemis: {
-    id: 'artemis',
-    name: 'SW Artemis US Select Pn CS8',
-    isin: 'GB00BYPFY508',
-    holdings: [
-      { company: 'Nvidia Corp', ticker: 'NVDA' },
-      { company: 'Alphabet Inc', ticker: 'GOOG' },
-      { company: 'Bank of New York Mellon', ticker: 'BNY' },
-      { company: 'Apple Inc', ticker: 'AAPL' },
-      { company: 'Goldman Sachs Group', ticker: 'GS' },
-      { company: 'Cardinal Health', ticker: 'CAH' },
-      { company: 'Targa Resources Corp', ticker: 'TRGP' },
-      { company: 'Walmart Inc', ticker: 'WMT' },
-      { company: 'Broadcom Inc', ticker: 'AVGO' },
-      { company: 'Parker-Hannifin Corp', ticker: 'PH' }
-    ]
-  }
-};
+import { FUNDS } from './funds.mjs';
 
-// Fund value state (loaded from /api/funds)
-let fundState = {
-  japan: { value: 0, lastApplied: null },
-  asiapac: { value: 0, lastApplied: null },
-  veritas: { value: 0, lastApplied: null },
-  artemis: { value: 0, lastApplied: null }
-};
+// -----------------------------------------------------------------------------
+// Fund value state (loaded from /api/funds). Initialised from FUNDS keys so
+// swapping funds in funds.mjs is a one-file change.
+// -----------------------------------------------------------------------------
+let fundState = {};
+for (const key of Object.keys(FUNDS)) {
+  fundState[key] = { value: 0, lastApplied: null };
+}
 
 // UK time helpers
 function getUKDate() {
@@ -101,13 +32,59 @@ function formatGBP(value) {
   return '£' + Math.round(value || 0).toLocaleString('en-GB');
 }
 
-// Load fund values from server
+// -----------------------------------------------------------------------------
+// DOM builders - generate portfolio rows and dashboard columns from FUNDS.
+// -----------------------------------------------------------------------------
+function buildPortfolioRows() {
+  const container = document.getElementById('portfolioFundRows');
+  container.innerHTML = '';
+  for (const [key, fund] of Object.entries(FUNDS)) {
+    const row = document.createElement('div');
+    row.className = 'portfolio-row sub-row';
+    row.innerHTML = `
+      <span class="portfolio-label">${fund.name}</span>
+      <span class="fund-value editable" data-fund="${key}" id="${key}-value">£0</span>
+    `;
+    container.appendChild(row);
+  }
+}
+
+function buildDashboardColumns() {
+  const grid = document.getElementById('dashboardGrid');
+  grid.innerHTML = '';
+  for (const [key, fund] of Object.entries(FUNDS)) {
+    const col = document.createElement('div');
+    col.className = 'fund-column';
+    const isinRow = fund.isin ? `<div class="isin">${fund.isin}</div>` : '';
+    col.innerHTML = `
+      <div class="column-header">
+        <h2>${fund.name}</h2>
+        ${isinRow}
+      </div>
+      <div class="holdings" id="${key}-holdings"></div>
+      <div class="column-footer">
+        <div class="average-label">Top ${fund.holdings.length} Average</div>
+        <div class="average-value" id="${key}-avg">–</div>
+      </div>
+    `;
+    grid.appendChild(col);
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Fund state persistence
+// -----------------------------------------------------------------------------
 async function loadFundState() {
   try {
     const res = await fetch('/api/funds');
     if (res.ok) {
       const data = await res.json();
-      if (data && !data.error) fundState = data;
+      if (data && !data.error) {
+        // Only pull in keys we know about; ignore orphaned keys from old fund sets
+        for (const key of Object.keys(FUNDS)) {
+          if (data[key]) fundState[key] = data[key];
+        }
+      }
     }
   } catch (e) {
     console.error('Failed to load fund state:', e);
@@ -115,7 +92,6 @@ async function loadFundState() {
   renderFundValues();
 }
 
-// Save edited values to server
 async function saveFundValue(fundKey, newValue) {
   try {
     const res = await fetch('/api/funds', {
@@ -128,7 +104,9 @@ async function saveFundValue(fundKey, newValue) {
       console.error('Save failed:', data);
       setError(`Save failed: ${data.error || res.status}. Make sure Upstash Redis is connected and project has redeployed.`);
     } else {
-      fundState = data;
+      for (const key of Object.keys(FUNDS)) {
+        if (data[key]) fundState[key] = data[key];
+      }
       setError('');
     }
   } catch (e) {
@@ -138,7 +116,6 @@ async function saveFundValue(fundKey, newValue) {
   renderFundValues();
 }
 
-// Apply daily change snapshot (after 7pm UK)
 async function applyDailyChanges(percentages) {
   try {
     const res = await fetch('/api/funds', {
@@ -148,7 +125,11 @@ async function applyDailyChanges(percentages) {
     });
     if (res.ok) {
       const data = await res.json();
-      if (data.state) fundState = data.state;
+      if (data.state) {
+        for (const key of Object.keys(FUNDS)) {
+          if (data.state[key]) fundState[key] = data.state[key];
+        }
+      }
       console.log('Daily values applied:', data.applied);
     }
   } catch (e) {
@@ -157,19 +138,17 @@ async function applyDailyChanges(percentages) {
   renderFundValues();
 }
 
-// Render the portfolio summary values
 function renderFundValues() {
   let total = 0;
-  for (const key of Object.keys(fundState)) {
+  for (const key of Object.keys(FUNDS)) {
     const el = document.getElementById(`${key}-value`);
-    if (el) el.textContent = formatGBP(fundState[key].value);
-    total += fundState[key].value || 0;
+    const val = fundState[key]?.value || 0;
+    if (el) el.textContent = formatGBP(val);
+    total += val;
   }
-  const totalEl = document.getElementById('totalValue');
-  if (totalEl) totalEl.textContent = formatGBP(total);
+  document.getElementById('totalValue').textContent = formatGBP(total);
 }
 
-// Make a value editable - click to edit, save on Enter/blur
 function setupValueEditor(el) {
   el.addEventListener('click', () => {
     if (el.querySelector('input')) return;
@@ -208,7 +187,9 @@ function setupValueEditor(el) {
   });
 }
 
-// UI Helpers
+// -----------------------------------------------------------------------------
+// Quote fetching + rendering
+// -----------------------------------------------------------------------------
 function setError(msg) {
   const box = document.getElementById('errorBox');
   if (msg) {
@@ -224,34 +205,30 @@ function updateTimestamp() {
     'Last updated: ' + new Date().toLocaleString();
 }
 
-// Fetch all quotes for a fund in a single batched API call
 async function fetchFundQuotes(tickers) {
   try {
     const symbols = tickers.join(',');
     const res = await fetch(`/api/quote?symbols=${encodeURIComponent(symbols)}`);
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
-    return data; // { ticker: { c, pc, t } | null }
+    return data;
   } catch (e) {
     console.error('Batch fetch error:', e);
     return {};
   }
 }
 
-// Calculate percentage change
 function calculateChange(current, previous) {
   if (!previous || previous === 0) return null;
   return ((current - previous) / previous) * 100;
 }
 
-// Format percentage for display
 function formatPercent(value) {
   if (value === null) return '–';
   const sign = value >= 0 ? '+' : '';
   return sign + value.toFixed(2) + '%';
 }
 
-// Get CSS class for change color
 function getChangeClass(value) {
   if (value === null) return 'change-loading';
   if (value > 0.1) return 'change-positive';
@@ -259,20 +236,17 @@ function getChangeClass(value) {
   return 'change-neutral';
 }
 
-// Render holdings for a fund
 async function renderFund(fundKey) {
-  const fund = fundData[fundKey];
+  const fund = FUNDS[fundKey];
   const holdingsEl = document.getElementById(`${fundKey}-holdings`);
   const avgEl = document.getElementById(`${fundKey}-avg`);
 
   holdingsEl.innerHTML = '';
-  let changes = [];
+  const changes = [];
 
-  // Fetch all quotes in a single batched API call
   const tickers = fund.holdings.map(h => h.ticker);
   const quotesMap = await fetchFundQuotes(tickers);
 
-  // Render each holding
   fund.holdings.forEach((holding) => {
     const quote = quotesMap[holding.ticker];
     const change = quote ? calculateChange(quote.c, quote.pc) : null;
@@ -280,66 +254,46 @@ async function renderFund(fundKey) {
 
     const row = document.createElement('div');
     row.className = 'holding-row';
-
-    const name = document.createElement('div');
-    name.className = 'holding-name';
-    name.textContent = holding.company;
-
-    const ticker = document.createElement('div');
-    ticker.className = 'holding-ticker';
-    ticker.textContent = holding.ticker;
-
-    const changeEl = document.createElement('div');
-    changeEl.className = `holding-change ${getChangeClass(change)}`;
-    changeEl.textContent = formatPercent(change);
-
-    row.appendChild(name);
-    row.appendChild(ticker);
-    row.appendChild(changeEl);
+    row.innerHTML = `
+      <div class="holding-name">${holding.company}</div>
+      <div class="holding-ticker">${holding.ticker}</div>
+      <div class="holding-change ${getChangeClass(change)}">${formatPercent(change)}</div>
+    `;
     holdingsEl.appendChild(row);
   });
 
-  // Calculate and display average
   const validChanges = changes.filter(c => c !== null);
-  let avgChange = null;
-  if (validChanges.length > 0) {
-    avgChange = validChanges.reduce((a, b) => a + b, 0) / validChanges.length;
-  }
+  const avgChange = validChanges.length > 0
+    ? validChanges.reduce((a, b) => a + b, 0) / validChanges.length
+    : null;
 
   avgEl.textContent = formatPercent(avgChange);
-  avgEl.className = getChangeClass(avgChange);
+  avgEl.className = 'average-value ' + getChangeClass(avgChange);
 
   return avgChange;
 }
 
-// Refresh all funds
 async function refreshAll() {
   setError('');
   console.log('Refreshing all funds...');
 
-  // Load saved fund values and quotes in parallel
-  const [_, ...avgs] = await Promise.all([
+  const fundKeys = Object.keys(FUNDS);
+  const results = await Promise.all([
     loadFundState(),
-    renderFund('japan'),
-    renderFund('asiapac'),
-    renderFund('veritas'),
-    renderFund('artemis')
+    ...fundKeys.map(k => renderFund(k))
   ]);
+  const avgs = results.slice(1);
 
-  const [japanAvg, asiapacAvg, veritasAvg, artemisAvg] = avgs;
-
-  // Apply daily snapshot if past 09:10 UK and not already applied today
   const ukMinutes = getUKMinutesSinceMidnight();
   const ukDate = getUKDate();
 
   if (ukMinutes >= DAILY_APPLY_MINUTE) {
     const percentages = {};
-    const avgMap = { japan: japanAvg, asiapac: asiapacAvg, veritas: veritasAvg, artemis: artemisAvg };
-    for (const [fund, pct] of Object.entries(avgMap)) {
-      if (fundState[fund] && fundState[fund].lastApplied !== ukDate && pct !== null) {
-        percentages[fund] = pct;
+    fundKeys.forEach((key, i) => {
+      if (fundState[key] && fundState[key].lastApplied !== ukDate && avgs[i] !== null) {
+        percentages[key] = avgs[i];
       }
-    }
+    });
     if (Object.keys(percentages).length > 0) {
       console.log('Applying daily snapshot:', percentages);
       await applyDailyChanges(percentages);
@@ -349,17 +303,19 @@ async function refreshAll() {
   updateTimestamp();
 }
 
-// Test API keys
+// -----------------------------------------------------------------------------
+// Test button - probes one ticker per fund + one US ticker as a control
+// -----------------------------------------------------------------------------
 async function testApiKeys() {
   const statusEl = document.getElementById('apiStatus');
   statusEl.textContent = 'Testing…';
 
-  const tests = [
-    { name: 'Stock quote (NVDA)', ticker: 'NVDA' },
-    { name: 'Stock quote (7203.T)', ticker: '7203.T' },
-    { name: 'Stock quote (005930.KS)', ticker: '005930.KS' },
-    { name: 'Stock quote (2330.TW)', ticker: '2330.TW' }
-  ];
+  const tests = [];
+  for (const [key, fund] of Object.entries(FUNDS)) {
+    if (fund.holdings.length > 0) {
+      tests.push({ name: `${fund.name} (${fund.holdings[0].ticker})`, ticker: fund.holdings[0].ticker });
+    }
+  }
 
   const results = await Promise.all(tests.map(async t => {
     try {
@@ -385,17 +341,18 @@ async function testApiKeys() {
     .join('<br>');
 }
 
-// Expose functions
+// -----------------------------------------------------------------------------
+// Boot
+// -----------------------------------------------------------------------------
 window.refreshAll = refreshAll;
 window.testApiKeys = testApiKeys;
 
-// Wire up click-to-edit on fund values
+buildPortfolioRows();
+buildDashboardColumns();
 document.querySelectorAll('.fund-value.editable').forEach(setupValueEditor);
 
-// Initial load
 refreshAll();
 
-// Auto-refresh every 15 minutes
 setInterval(() => {
   console.log('Auto-refresh triggered');
   refreshAll();

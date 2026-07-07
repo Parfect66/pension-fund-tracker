@@ -2,15 +2,6 @@ const KV_URL = process.env.KV_REST_API_URL;
 const KV_TOKEN = process.env.KV_REST_API_TOKEN;
 const KV_KEY = 'pension-funds-state';
 
-const DEFAULT_STATE = {
-  japan: { value: 0, lastApplied: null },
-  asiapac: { value: 0, lastApplied: null },
-  veritas: { value: 0, lastApplied: null },
-  artemis: { value: 0, lastApplied: null }
-};
-
-const VALID_FUNDS = Object.keys(DEFAULT_STATE);
-
 async function kvGet(key) {
   if (!KV_URL || !KV_TOKEN) throw new Error('KV not configured');
   const res = await fetch(`${KV_URL}/get/${encodeURIComponent(key)}`, {
@@ -58,43 +49,46 @@ function getUKMinutesSinceMidnight() {
 
 const DAILY_APPLY_MINUTE = 9 * 60 + 10; // 09:10 UK
 
-function mergeWithDefaults(state) {
-  const result = { ...DEFAULT_STATE };
+// Basic per-key validation. Fund key is arbitrary (client-driven), but we clamp
+// to a sane length so KV isn't stuffed with garbage keys.
+function isValidFundKey(k) {
+  return typeof k === 'string' && k.length > 0 && k.length <= 64 && /^[a-zA-Z0-9_-]+$/.test(k);
+}
+
+function normaliseState(state) {
+  const out = {};
   if (state && typeof state === 'object') {
-    for (const fund of VALID_FUNDS) {
-      if (state[fund]) {
-        result[fund] = {
-          value: Number(state[fund].value) || 0,
-          lastApplied: state[fund].lastApplied || null
-        };
-      }
+    for (const [key, entry] of Object.entries(state)) {
+      if (!isValidFundKey(key) || !entry || typeof entry !== 'object') continue;
+      out[key] = {
+        value: Number(entry.value) || 0,
+        lastApplied: entry.lastApplied || null
+      };
     }
   }
-  return result;
+  return out;
 }
 
 export default async function handler(req, res) {
   try {
     if (req.method === 'GET') {
-      const state = mergeWithDefaults(await kvGet(KV_KEY));
+      const state = normaliseState(await kvGet(KV_KEY));
       return res.status(200).json(state);
     }
 
     if (req.method === 'POST') {
       const body = req.body || {};
       const { action } = body;
-      const currentState = mergeWithDefaults(await kvGet(KV_KEY));
+      const currentState = normaliseState(await kvGet(KV_KEY));
 
       if (action === 'update') {
-        // Manual edit from UI
         const values = body.values || {};
-        for (const fund of VALID_FUNDS) {
-          if (values[fund] !== undefined) {
-            const num = Number(values[fund]);
-            if (!isNaN(num) && num >= 0) {
-              currentState[fund].value = num;
-            }
-          }
+        for (const [key, raw] of Object.entries(values)) {
+          if (!isValidFundKey(key)) continue;
+          const num = Number(raw);
+          if (isNaN(num) || num < 0) continue;
+          if (!currentState[key]) currentState[key] = { value: 0, lastApplied: null };
+          currentState[key].value = num;
         }
         await kvSet(KV_KEY, currentState);
         return res.status(200).json(currentState);
@@ -110,15 +104,15 @@ export default async function handler(req, res) {
 
         const percentages = body.percentages || {};
         const applied = {};
-        for (const fund of VALID_FUNDS) {
-          if (currentState[fund].lastApplied !== ukDate && percentages[fund] !== undefined && percentages[fund] !== null) {
-            const pct = Number(percentages[fund]);
-            if (!isNaN(pct)) {
-              currentState[fund].value = currentState[fund].value * (1 + pct / 100);
-              currentState[fund].lastApplied = ukDate;
-              applied[fund] = pct;
-            }
-          }
+        for (const [key, raw] of Object.entries(percentages)) {
+          if (!isValidFundKey(key) || raw === null || raw === undefined) continue;
+          const pct = Number(raw);
+          if (isNaN(pct)) continue;
+          if (!currentState[key]) currentState[key] = { value: 0, lastApplied: null };
+          if (currentState[key].lastApplied === ukDate) continue; // already applied today
+          currentState[key].value = currentState[key].value * (1 + pct / 100);
+          currentState[key].lastApplied = ukDate;
+          applied[key] = pct;
         }
 
         await kvSet(KV_KEY, currentState);

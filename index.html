@@ -14,7 +14,7 @@
 
   <div class="controls">
     <button onclick="refreshAll()">Refresh Data</button>
-    <button onclick="testApiKeys()">Test API Keys</button>
+    <button onclick="testApiKeys()">Test API</button>
     <span id="lastUpdated" class="timestamp"></span>
   </div>
 
@@ -25,74 +25,11 @@
       <span class="portfolio-label">Total Portfolio</span>
       <span class="portfolio-value" id="totalValue">£0</span>
     </div>
-    <div class="portfolio-row sub-row">
-      <span class="portfolio-label">SW SSgA Japan Equity</span>
-      <span class="fund-value editable" data-fund="japan" id="japan-value">£0</span>
-    </div>
-    <div class="portfolio-row sub-row">
-      <span class="portfolio-label">SW SSgA Asia Pacific ex Japan</span>
-      <span class="fund-value editable" data-fund="asiapac" id="asiapac-value">£0</span>
-    </div>
-    <div class="portfolio-row sub-row">
-      <span class="portfolio-label">SW Veritas Asian</span>
-      <span class="fund-value editable" data-fund="veritas" id="veritas-value">£0</span>
-    </div>
-    <div class="portfolio-row sub-row">
-      <span class="portfolio-label">SW Artemis US Select</span>
-      <span class="fund-value editable" data-fund="artemis" id="artemis-value">£0</span>
-    </div>
+    <div id="portfolioFundRows"></div>
     <div class="portfolio-hint">Click any fund value to edit. Daily change applied at 09:10 UK time.</div>
   </div>
 
-  <div class="dashboard-grid">
-    <div class="fund-column">
-      <div class="column-header">
-        <h2>SW SSgA Japan Equity</h2>
-        <div class="isin">GB00B2PGH611</div>
-      </div>
-      <div class="holdings" id="japan-holdings"></div>
-      <div class="column-footer">
-        <div class="average-label">Top 10 Average</div>
-        <div class="average-value" id="japan-avg">–</div>
-      </div>
-    </div>
-
-    <div class="fund-column">
-      <div class="column-header">
-        <h2>SW SSgA Asia Pacific ex Japan</h2>
-        <div class="isin">GB00B2PGH389</div>
-      </div>
-      <div class="holdings" id="asiapac-holdings"></div>
-      <div class="column-footer">
-        <div class="average-label">Top 10 Average</div>
-        <div class="average-value" id="asiapac-avg">–</div>
-      </div>
-    </div>
-
-    <div class="fund-column">
-      <div class="column-header">
-        <h2>SW Veritas Asian</h2>
-        <div class="isin">GB00BYPG4T70</div>
-      </div>
-      <div class="holdings" id="veritas-holdings"></div>
-      <div class="column-footer">
-        <div class="average-label">Top 10 Average</div>
-        <div class="average-value" id="veritas-avg">–</div>
-      </div>
-    </div>
-
-    <div class="fund-column">
-      <div class="column-header">
-        <h2>SW Artemis US Select</h2>
-        <div class="isin">GB00BYPFY508</div>
-      </div>
-      <div class="holdings" id="artemis-holdings"></div>
-      <div class="column-footer">
-        <div class="average-label">Top 10 Average</div>
-        <div class="average-value" id="artemis-avg">–</div>
-      </div>
-    </div>
-  </div>
+  <div class="dashboard-grid" id="dashboardGrid"></div>
 
   <div id="apiStatus"></div>
 </div>
