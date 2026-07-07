@@ -1,5 +1,15 @@
+// Exchange suffixes for markets that close BEFORE the US session each day.
+// At 09:10 UK the "latest close" for these has already happened this morning UK
+// time, whereas US stocks show yesterday's close - misaligning the daily move.
+// We shift these back by one bar so the move matches the same trading window.
+const ASIA_PAC_SUFFIXES = ['.AX', '.T', '.KS', '.TW', '.HK', '.SS', '.SI'];
+
+function isAsiaPacific(ticker) {
+  return ASIA_PAC_SUFFIXES.some(sfx => ticker.endsWith(sfx));
+}
+
 async function fetchYahooQuote(symbol) {
-  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=5d`;
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=10d`;
 
   const response = await fetch(url, {
     headers: {
@@ -24,31 +34,63 @@ async function fetchYahooQuote(symbol) {
   }
 
   const meta = result.meta;
-  const price = meta.regularMarketPrice;
 
-  // Prefer Yahoo's authoritative previousClose - it's the same "prev close" shown on Yahoo/MSN etc.
-  // Fall back to the closes array only if that field is missing.
-  let prevClose = meta.previousClose;
+  // Non-Asia/Pacific (i.e. US, TO, L): use Yahoo's authoritative fields.
+  if (!isAsiaPacific(symbol)) {
+    const price = meta.regularMarketPrice;
+    let prevClose = meta.previousClose;
 
-  if (typeof prevClose !== 'number') {
-    // Walk the daily closes and pick the last close that occurred before today's market bar.
-    const closes = result.indicators?.quote?.[0]?.close;
-    const timestamps = result.timestamp;
-    const todayTs = meta.regularMarketTime || Math.floor(Date.now() / 1000);
-    // Bars are stamped at market-day start; "today" bar's timestamp is within ~1 day of regularMarketTime.
-    if (Array.isArray(closes) && Array.isArray(timestamps)) {
-      for (let i = timestamps.length - 1; i >= 0; i--) {
-        if (typeof closes[i] === 'number' && (todayTs - timestamps[i]) > 43200) { // >12h old = a prior day
-          prevClose = closes[i];
-          break;
+    if (typeof prevClose !== 'number') {
+      const closes = result.indicators?.quote?.[0]?.close;
+      const timestamps = result.timestamp;
+      const todayTs = meta.regularMarketTime || Math.floor(Date.now() / 1000);
+      if (Array.isArray(closes) && Array.isArray(timestamps)) {
+        for (let i = timestamps.length - 1; i >= 0; i--) {
+          if (typeof closes[i] === 'number' && (todayTs - timestamps[i]) > 43200) {
+            prevClose = closes[i];
+            break;
+          }
         }
       }
     }
+    if (typeof prevClose !== 'number') prevClose = meta.chartPreviousClose;
+
+    if (typeof price !== 'number' || typeof prevClose !== 'number') {
+      throw new Error('Missing price data');
+    }
+    return {
+      c: price,
+      pc: prevClose,
+      t: meta.regularMarketTime || Math.floor(Date.now() / 1000)
+    };
   }
 
-  if (typeof prevClose !== 'number') {
-    prevClose = meta.chartPreviousClose;
+  // Asia/Pacific: shift back one bar so the displayed change matches the
+  // "yesterday US close" window, not this morning's local close.
+  const closes = result.indicators?.quote?.[0]?.close;
+  const timestamps = result.timestamp;
+  if (!Array.isArray(closes) || !Array.isArray(timestamps)) {
+    throw new Error('Missing chart data for shifted quote');
   }
+
+  // Collect valid (close, ts) pairs, newest first
+  const pairs = [];
+  for (let i = timestamps.length - 1; i >= 0; i--) {
+    if (typeof closes[i] === 'number') {
+      pairs.push({ close: closes[i], ts: timestamps[i] });
+    }
+    if (pairs.length >= 4) break;
+  }
+
+  if (pairs.length < 3) {
+    throw new Error('Not enough historical bars for Asia/Pacific shift');
+  }
+
+  // pairs[0] = today's local close (just closed this morning UK)
+  // pairs[1] = yesterday's local close  <-- use as "current" for alignment
+  // pairs[2] = day-before-yesterday's local close  <-- use as "prev close"
+  const price = pairs[1].close;
+  const prevClose = pairs[2].close;
 
   if (typeof price !== 'number' || typeof prevClose !== 'number') {
     throw new Error('Missing price data');
@@ -57,7 +99,7 @@ async function fetchYahooQuote(symbol) {
   return {
     c: price,
     pc: prevClose,
-    t: meta.regularMarketTime || Math.floor(Date.now() / 1000)
+    t: pairs[1].ts
   };
 }
 
