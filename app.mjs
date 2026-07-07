@@ -1,4 +1,5 @@
 import { FUNDS } from './funds.mjs';
+import { getUKDate, getUKMinutesSinceMidnight, DAILY_APPLY_MINUTE, DAILY_APPLY_LABEL } from './uk-time.mjs';
 
 // -----------------------------------------------------------------------------
 // Fund value state (loaded from /api/funds). Initialised from FUNDS keys so
@@ -8,25 +9,6 @@ let fundState = {};
 for (const key of Object.keys(FUNDS)) {
   fundState[key] = { value: 0, lastApplied: null };
 }
-
-// UK time helpers
-function getUKDate() {
-  return new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'Europe/London',
-    year: 'numeric', month: '2-digit', day: '2-digit'
-  }).format(new Date());
-}
-
-function getUKMinutesSinceMidnight() {
-  const parts = new Intl.DateTimeFormat('en-GB', {
-    timeZone: 'Europe/London', hour: '2-digit', minute: '2-digit', hour12: false
-  }).formatToParts(new Date());
-  const hh = parseInt(parts.find(p => p.type === 'hour').value, 10);
-  const mm = parseInt(parts.find(p => p.type === 'minute').value, 10);
-  return hh * 60 + mm;
-}
-
-const DAILY_APPLY_MINUTE = 9 * 60 + 10; // 09:10 UK
 
 function formatGBP(value) {
   return '£' + Math.round(value || 0).toLocaleString('en-GB');
@@ -349,6 +331,8 @@ window.testApiKeys = testApiKeys;
 
 buildPortfolioRows();
 buildDashboardColumns();
+document.getElementById('portfolioHint').textContent =
+  `Click any fund value to edit. Daily change applied at ${DAILY_APPLY_LABEL} UK time.`;
 document.querySelectorAll('.fund-value.editable').forEach(setupValueEditor);
 
 refreshAll();
