@@ -1,128 +1,111 @@
 # Pension Fund Tracker
 
-Real-time tracking dashboard for Scottish Widows pension funds. Displays the top 10 holdings in each fund with live stock price changes from Finnhub.
+Live dashboard for Scottish Widows pension funds. Shows each fund's top-10 holdings with daily % moves from Yahoo Finance, tracks your fund values, and compounds each fund's average daily change into its value once per day.
+
+Currently tracked funds (defined in [`funds.mjs`](funds.mjs)):
+
+- **SW AXA Framlington Biotech CS8**
+- **SW BlackRock Gold & General CS8**
 
 ## Features
 
-- **4 Pension Funds**: SW SSgA Japan Equity, SW SSgA Asia Pacific ex Japan, SW Veritas Asian, and SW Artemis US Select
-- **Top 10 Holdings**: Each fund displays its 10 largest holdings
-- **Live Price Changes**: % change from previous market close for each stock
-- **Average Performance**: Calculates and displays the average % change for each fund's top 10
-- **Auto-Refresh**: Updates data every 15 minutes
-- **Responsive Design**: Works on desktop, tablet, and mobile
+- **Swappable funds**: the whole dashboard is generated from the `FUNDS` object in `funds.mjs` — edit that one file to change what's tracked (see [factsheets/README.md](factsheets/README.md) for the drop-a-PDF workflow)
+- **Live price changes**: % change from previous close for every holding, via Yahoo Finance
+- **Fund value tracking**: click any fund value to edit it; values persist in Vercel KV (Upstash Redis)
+- **Daily compounding**: at 09:10 UK time each day, each fund's average holding change is applied once to its stored value
+- **Auto-refresh**: quotes refresh every 15 minutes
+- **Test API button**: probes one ticker per fund and reports pass/fail
 
 ## Stack
 
-- **Frontend**: HTML5, CSS3, Vanilla JavaScript (ES6 modules)
-- **Backend**: Node.js serverless functions (Vercel)
-- **Data**: Finnhub Stock API (https://finnhub.io)
+- **Frontend**: static HTML/CSS + vanilla JS ES modules — no build step
+- **Backend**: two Vercel serverless functions in `api/` (ESM, `.mjs`)
+- **Market data**: Yahoo Finance chart API (proxied server-side, no API key needed)
+- **Storage**: Vercel KV / Upstash Redis via REST
 - **Deployment**: Vercel
 
-## Setup
-
-### Local Development
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/Parfect66/pension-fund-tracker.git
-   cd pension-fund-tracker
-   ```
-
-2. Install Vercel CLI:
-   ```bash
-   npm install -g vercel
-   ```
-
-3. Link to Vercel project and run locally:
-   ```bash
-   vercel
-   vercel dev
-   ```
-
-4. Open http://localhost:3000 in your browser
-
-### Environment Variables
-
-You need a Finnhub API key. Set it as an environment variable:
-
-```bash
-export FINNHUB_KEY=your_api_key_here
-```
-
-Or create a `.env.local` file:
-```
-FINNHUB_KEY=your_api_key_here
-```
-
-Get a free API key at https://finnhub.io
-
-### Deployment to Vercel
-
-1. Connect your GitHub repo to Vercel
-2. Set the `FINNHUB_KEY` environment variable in Vercel project settings
-3. Deploy:
-   ```bash
-   vercel
-   ```
-
-## File Structure
+## File structure
 
 ```
 pension-fund-tracker/
-├── index.html          # Main dashboard page
-├── app.mjs             # Frontend JavaScript (fund data, data fetching, rendering)
-├── style.css           # Dashboard styling
+├── index.html          # Page shell; containers filled by app.mjs
+├── app.mjs             # Frontend: rendering, quote fetching, value editing, daily apply
+├── funds.mjs           # THE fund list - names + holdings with Yahoo tickers
+├── uk-time.mjs         # Shared UK-time helpers + daily-apply schedule (single source of truth)
+├── style.css           # Styling
 ├── api/
-│   └── quote.js        # Finnhub API proxy endpoint
-├── package.json        # Project metadata
-├── vercel.json         # Vercel deployment config
-└── README.md           # This file
+│   ├── quote.mjs       # Yahoo Finance proxy
+│   └── funds.mjs       # Fund value persistence (Vercel KV)
+├── factsheets/         # Drop fund factsheet PDFs here to have Claude swap funds
+├── package.json
+├── vercel.json
+└── README.md
 ```
 
 ## API
 
-### GET `/api/quote?symbol=TICKER`
+### GET `/api/quote?symbols=TICKER1,TICKER2,...`
 
-Fetches the latest quote for a stock ticker from Finnhub.
+Batch-fetches quotes from Yahoo Finance. Tickers use Yahoo's exchange suffixes (`NST.AX`, `EDV.TO`, `7203.T`, `005930.KS`, …).
 
-**Parameters:**
-- `symbol` (string): Stock ticker symbol (e.g., `NVDA`, `7203.T`, `005930.KS`)
-
-**Response:**
+**Response** (per ticker; `null` if that ticker failed):
 ```json
 {
-  "c": 150.25,      // Current price
-  "pc": 149.50,     // Previous close
-  "t": 1234567890   // Unix timestamp
+  "VRTX": { "c": 405.12, "pc": 401.88, "t": 1751875200 },
+  "NEM":  { "c": 58.31,  "pc": 57.90,  "t": 1751875200 }
 }
 ```
+`c` = current price, `pc` = previous close (Yahoo's `meta.previousClose`), `t` = quote timestamp.
 
-**Allowed symbols** include all holdings from the 4 pension funds.
+Add `&debug=1` to get `{ result, errors }` with per-ticker error messages.
 
-## Pension Funds Data
+### GET `/api/funds`
 
-### SW SSgA Japan Equity Index Pn CS8
-- ISIN: GB00B2PGH611
-- Tracks: FTSE World Japan Index
-- Holdings: Toyota, Mitsubishi UFJ, Hitachi, etc.
+Returns stored fund state: `{ <fundKey>: { value, lastApplied } }`.
 
-### SW SSgA Asia Pacific ex Japan Pn CS8
-- ISIN: GB00B2PGH389
-- Tracks: FTSE All-World Developed Asia Pacific ex Japan Index
-- Holdings: Samsung, SK Hynix, Commonwealth Bank, etc.
+### POST `/api/funds`
 
-### SW Veritas Asian Pn CS8
-- ISIN: GB00BYPG4T70
-- Manager: Ezra Sun
-- Focus: Taiwan & Korea (chip-heavy)
-- Holdings: Samsung, TSMC, Delta Electronics, SK Hynix, etc.
+- `{ "action": "update", "values": { "<fundKey>": 12345 } }` — manual value edit
+- `{ "action": "apply-daily", "percentages": { "<fundKey>": 1.23 } }` — compound daily % change into stored values; rejected before 09:10 UK, and applied at most once per fund per UK day
 
-### SW Artemis US Select Pn CS8
-- ISIN: GB00BYPFY508
-- Managers: Cormac Weldon & Chris Kent
-- Focus: US equities
-- Holdings: Nvidia, Alphabet, Apple, Goldman Sachs, etc.
+Fund keys are arbitrary (must match `[a-zA-Z0-9_-]{1,64}`); state for funds no longer in `funds.mjs` stays in KV but isn't displayed.
 
-## License
+## Setup
 
-Private - All rights reserved
+### Environment variables
+
+No market-data API key is required. Storage needs a Vercel KV / Upstash Redis database connected to the project, which provides:
+
+```
+KV_REST_API_URL
+KV_REST_API_TOKEN
+```
+
+Set automatically when you connect Upstash via the Vercel integration; put them in `.env.local` (gitignored) for local dev. **Never commit secrets or reference them in `vercel.json`.**
+
+### Local development
+
+```bash
+git clone https://github.com/Parfect66/pension-fund-tracker.git
+cd pension-fund-tracker
+npm install -g vercel
+vercel dev
+```
+
+Open http://localhost:3000.
+
+### Deployment
+
+Connect the GitHub repo to Vercel; every push to `master` deploys. There is no build step.
+
+## Changing the tracked funds
+
+1. Drop the new fund's factsheet PDF into `factsheets/` (from Trustnet or FE fundinfo).
+2. Ask Claude to add or replace the funds — it maps holdings to Yahoo tickers, verifies each with a live quote, and rewrites `funds.mjs`.
+3. Push. The dashboard rebuilds itself around the new list.
+
+Or edit `funds.mjs` by hand — the file header documents the format and ticker suffix conventions.
+
+## Changing the daily-apply time
+
+Edit `DAILY_APPLY_MINUTE` in `uk-time.mjs` — the client check, the server gate, and the UI hint all derive from it. It's set to 09:10 UK because all Asian markets have closed by then.

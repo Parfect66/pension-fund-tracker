@@ -1,3 +1,5 @@
+import { getUKDate, getUKMinutesSinceMidnight, DAILY_APPLY_MINUTE, DAILY_APPLY_LABEL } from '../uk-time.mjs';
+
 const KV_URL = process.env.KV_REST_API_URL;
 const KV_TOKEN = process.env.KV_REST_API_TOKEN;
 const KV_KEY = 'pension-funds-state';
@@ -30,24 +32,6 @@ async function kvSet(key, value) {
   if (!res.ok) throw new Error('KV write failed: HTTP ' + res.status);
   return true;
 }
-
-function getUKDate() {
-  return new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'Europe/London',
-    year: 'numeric', month: '2-digit', day: '2-digit'
-  }).format(new Date());
-}
-
-function getUKMinutesSinceMidnight() {
-  const parts = new Intl.DateTimeFormat('en-GB', {
-    timeZone: 'Europe/London', hour: '2-digit', minute: '2-digit', hour12: false
-  }).formatToParts(new Date());
-  const hh = parseInt(parts.find(p => p.type === 'hour').value, 10);
-  const mm = parseInt(parts.find(p => p.type === 'minute').value, 10);
-  return hh * 60 + mm;
-}
-
-const DAILY_APPLY_MINUTE = 9 * 60 + 10; // 09:10 UK
 
 // Basic per-key validation. Fund key is arbitrary (client-driven), but we clamp
 // to a sane length so KV isn't stuffed with garbage keys.
@@ -99,7 +83,7 @@ export default async function handler(req, res) {
         const ukMinutes = getUKMinutesSinceMidnight();
 
         if (ukMinutes < DAILY_APPLY_MINUTE) {
-          return res.status(400).json({ error: 'Not yet 09:10 UK time' });
+          return res.status(400).json({ error: `Not yet ${DAILY_APPLY_LABEL} UK time` });
         }
 
         const percentages = body.percentages || {};

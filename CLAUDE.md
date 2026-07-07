@@ -1,18 +1,20 @@
 # CLAUDE.md
 
-Pension fund tracker for 4 Scottish Widows funds. Static frontend (vanilla JS, no build step) + two Vercel serverless functions in `api/`. Live quotes come from Yahoo Finance; portfolio state persists in Vercel KV.
+Pension fund tracker for Scottish Widows funds (currently Biotech + Gold; the fund set is swappable via `funds.mjs`). Static frontend (vanilla JS, no build step) + two Vercel serverless functions in `api/`. Live quotes come from Yahoo Finance; portfolio state persists in Vercel KV.
 
 ## Architecture
 
-- `index.html` + `app.mjs` + `style.css` — frontend. Fund definitions and holdings live in `app.mjs`.
+- `funds.mjs` — **the fund list** (names + holdings with Yahoo tickers). The dashboard is generated entirely from this file; swapping funds is a one-file edit. The `factsheets/` folder is the drop zone for the swap workflow (see `factsheets/README.md`): user drops a Trustnet PDF, Claude maps holdings to Yahoo tickers, verifies each with a live quote, rewrites `funds.mjs`.
+- `index.html` + `app.mjs` + `style.css` — frontend. `index.html` is just a shell; `app.mjs` builds portfolio rows and dashboard columns from `FUNDS`.
+- `uk-time.mjs` — shared UK-time helpers + `DAILY_APPLY_MINUTE`, imported by both `app.mjs` (browser) and `api/funds.mjs` (server).
 - `api/quote.mjs` — proxies Yahoo Finance chart API (`query1.finance.yahoo.com/v8/finance/chart/`). Takes `?symbols=` (comma-separated), returns `{c, pc, t}` per ticker. Add `&debug=1` to get per-ticker errors in the response.
-- `api/funds.mjs` — GET/POST portfolio state to Vercel KV via REST (`KV_REST_API_URL` / `KV_REST_API_TOKEN` env vars). Actions: `update` (manual edit), `apply-daily` (compound daily % change into fund values).
+- `api/funds.mjs` — GET/POST portfolio state to Vercel KV via REST (`KV_REST_API_URL` / `KV_REST_API_TOKEN` env vars). Actions: `update` (manual edit), `apply-daily` (compound daily % change into fund values). Fund keys are client-driven (`[a-zA-Z0-9_-]{1,64}`), not hardcoded — orphaned keys from old fund sets stay in KV and are ignored by the UI. Renaming a key in `funds.mjs` orphans that fund's stored value.
 - Everything is ESM. API files **must** be `.mjs` — we already went CJS-and-back once; Vercel warns/breaks on `.js` here.
 
 ## Hard-won rules (each one cost a debugging session — don't relearn them)
 
 ### Market data: Yahoo Finance only. Do not switch providers.
-We burned a full day cycling Finnhub → Twelve Data → FMP → index ETFs → Finnhub → Marketstack → Yahoo. Every alternative failed on **international symbol coverage or free-tier rate limits**. The holdings use exchange suffixes (`7203.T`, `005930.KS`, `600183.SS`, `2330.TW`, `CBA.AX`, etc.) and most free APIs only cover US tickers. If a quote problem comes up, fix it within the Yahoo integration; if a provider change is ever truly needed, first verify the candidate returns data for the *actual* non-US tickers in `app.mjs` before writing any code.
+We burned a full day cycling Finnhub → Twelve Data → FMP → index ETFs → Finnhub → Marketstack → Yahoo. Every alternative failed on **international symbol coverage or free-tier rate limits**. Holdings use exchange suffixes (`NST.AX`, `EDV.TO` today; `7203.T`, `005930.KS`, `600183.SS`, `2330.TW` in past fund sets) and most free APIs only cover US tickers — and since the fund set is swappable, international coverage can become critical again with any fund swap. If a quote problem comes up, fix it within the Yahoo integration; if a provider change is ever truly needed, first verify the candidate returns data for the *actual* non-US tickers in `funds.mjs` before writing any code.
 
 ### Previous close: `meta.previousClose` is the source of truth.
 The % change calc was fixed **three separate times**. Final, correct priority (see `api/quote.mjs`):
@@ -22,12 +24,8 @@ The % change calc was fixed **three separate times**. Final, correct priority (s
 
 Do not "simplify" this fallback chain.
 
-### The 09:10 UK daily-apply time lives in THREE places — keep them in sync.
-- `app.mjs` — `DAILY_APPLY_MINUTE`
-- `api/funds.mjs` — `DAILY_APPLY_MINUTE` (server-side gate; rejects early applies)
-- `index.html` — human-readable hint text
-
-These once drifted (UI said 10:00, client checked 10:00, server checked 19:00) and the endpoint silently refused every apply for 9 hours a day. If you change the schedule, change all three in the same commit. 09:10 UK was chosen because all Asian markets have closed by then. All time logic uses `Europe/London` via `Intl.DateTimeFormat` — never the server's local clock.
+### The daily-apply schedule lives ONLY in `uk-time.mjs`. Don't reintroduce copies.
+`DAILY_APPLY_MINUTE` (09:10 UK) used to be duplicated across `app.mjs`, `api/funds.mjs`, and the `index.html` hint text. They drifted (UI said 10:00, client checked 10:00, server checked 19:00) and the endpoint silently refused every apply for 9 hours a day. Now the client check, server gate, UI hint, and error message all derive from the one constant in `uk-time.mjs` — change the schedule there and nowhere else, and never define a local `DAILY_APPLY_MINUTE` or UK-time helper in another file. 09:10 UK was chosen because all Asian markets have closed by then. All time logic uses `Europe/London` via `Intl.DateTimeFormat` — never the server's local clock.
 
 ### Secrets never go in `vercel.json` or the repo.
 An API key reference was committed once and had to be stripped. All secrets are Vercel project env vars (or `.env.local` locally, which is gitignored).
