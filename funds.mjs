@@ -30,20 +30,20 @@ export const FUNDS = {
     ]
   },
 
-  gold: {
-    name: 'SW BlackRock Gold & General CS8',
-    isin: '',
+  infra: {
+    name: 'SW L&G FTSE Dev Core Infrastructure CS8',
+    isin: 'GB00BMQDK398',
     holdings: [
-      { company: 'Barrick Mining',          ticker: 'B'      },
-      { company: 'Newmont',                 ticker: 'NEM'    },
-      { company: 'AngloGold Ashanti',       ticker: 'AU'     },
-      { company: 'Wheaton Precious Metals', ticker: 'WPM'    },
-      { company: 'Northern Star Resources', ticker: 'NST.AX' },
-      { company: 'Kinross Gold',            ticker: 'KGC'    },
-      { company: 'Endeavour Mining',        ticker: 'EDV.TO' },
-      { company: 'Franco-Nevada',           ticker: 'FNV'    },
-      { company: 'Agnico Eagle Mines',      ticker: 'AEM'    },
-      { company: 'Alamos Gold',             ticker: 'AGI'    }
+      { company: 'Nextera Energy',                   ticker: 'NEE' },
+      { company: 'Union Pacific',                    ticker: 'UNP' },
+      { company: 'Enbridge',                         ticker: 'ENB' },
+      { company: 'Southern Company',                 ticker: 'SO'  },
+      { company: 'Duke Energy',                      ticker: 'DUK' },
+      { company: 'Williams Companies',               ticker: 'WMB' },
+      { company: 'National Grid',                    ticker: 'NGG' },
+      { company: 'American Tower',                   ticker: 'AMT' },
+      { company: 'CSX',                              ticker: 'CSX' },
+      { company: 'Canadian Pacific Kansas City',     ticker: 'CP'  }
     ]
   }
 };
