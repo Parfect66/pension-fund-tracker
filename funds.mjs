@@ -26,7 +26,7 @@ export const FUNDS = {
       { company: 'Insmed',                    ticker: 'INSM' },
       { company: 'Ionis Pharmaceuticals',     ticker: 'IONS' },
       { company: 'Revolution Medicines',      ticker: 'RVMD' },
-      { company: 'Alnylam Pharmaceuticals',   ticker: 'ALNY' }
+      { company: 'Mirum Pharmaceuticals',     ticker: 'MIRM' }
     ]
   },
 
