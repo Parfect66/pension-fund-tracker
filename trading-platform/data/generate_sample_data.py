@@ -26,13 +26,15 @@ def generate_ohlcv(n_bars, start_price):
 
     rows = []
     # Build hourly timestamps, skipping weekends and outside trading hours (8am–5pm ET)
-    current = datetime(2026, 5, 1, 9, 0)  # start on a weekday morning
+    # Start at 9:30am ET on a weekday — the exact market open for ORB
+    current = datetime(2026, 5, 1, 9, 30)
     for i in range(n_bars):
         # Skip weekends
         while current.weekday() >= 5:
             current += timedelta(hours=1)
-        # Skip outside 8am–5pm ET window
-        while current.hour < 8 or current.hour >= 17:
+        # Skip outside 9:30am–4pm ET window (regular US session)
+        while (current.hour < 9 or (current.hour == 9 and current.minute < 30)) \
+               or current.hour >= 16:
             current += timedelta(hours=1)
             while current.weekday() >= 5:
                 current += timedelta(hours=1)
