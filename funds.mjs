@@ -50,6 +50,40 @@ export const FUNDS = {
     ]
   },
 
+  climate: {
+    name: 'SW BlackRock ACS Climate Transition CS8',
+    isin: 'GB00BMQDJL09',
+    holdings: [
+      { company: 'Nvidia',            ticker: 'NVDA' },
+      { company: 'Apple',             ticker: 'AAPL' },
+      { company: 'Microsoft',         ticker: 'MSFT' },
+      { company: 'Amazon',            ticker: 'AMZN' },
+      { company: 'Alphabet A',        ticker: 'GOOGL' },
+      { company: 'Alphabet C',        ticker: 'GOOG' },
+      { company: 'Broadcom',          ticker: 'AVGO' },
+      { company: 'Mastercard',        ticker: 'MA'   },
+      { company: 'Meta Platforms',    ticker: 'META' },
+      { company: 'Tesla',             ticker: 'TSLA' }
+    ]
+  },
+
+  artemis: {
+    name: 'SW Artemis US Select CS8',
+    isin: 'GB00BMRS2P98',
+    holdings: [
+      { company: 'Nvidia',               ticker: 'NVDA' },
+      { company: 'Alphabet A',           ticker: 'GOOGL' },
+      { company: 'Bank of New York Mellon', ticker: 'BK' },
+      { company: 'Apple',                ticker: 'AAPL' },
+      { company: 'Goldman Sachs',        ticker: 'GS'   },
+      { company: 'Cardinal Health',      ticker: 'CAH'  },
+      { company: 'Targa Resources',      ticker: 'TRGP' },
+      { company: 'Walmart',              ticker: 'WMT'  },
+      { company: 'Broadcom',             ticker: 'AVGO' },
+      { company: 'Parker-Hannifin',      ticker: 'PH'   }
+    ]
+  },
+
   infra: {
     name: 'SW L&G FTSE Dev Core Infrastructure CS8',
     isin: 'GB00BMQDK398',
