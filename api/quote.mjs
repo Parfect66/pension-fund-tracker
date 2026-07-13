@@ -1,3 +1,76 @@
+// FE Precision Plus handler for direct NAV-based daily change.
+// Ticker format: "FE:<CitiCode>" — calls the SW pension fund portal.
+async function fetchFeQuote(citiCode) {
+  const params = {
+    FilteringOptions: {
+      undefined: 0,
+      SearchText: 'International',
+      PerformanceOperator: 'GREAT',
+      RangeId: null,
+      RangeName: '',
+      CategoryId: '7gpp01',
+      Category2Id: null,
+      PriipProductCode: null,
+      DefaultCategoryId: null,
+      DefaultCategory2Id: null,
+      ForSaleIn: null,
+      ShowMainUnits: false,
+      MPCategoryCode: null
+    },
+    ProjectName: 'corppen',
+    LanguageCode: 'en-GB',
+    UserType: '',
+    Region: '',
+    LanguageId: '1',
+    LocaleId: '1',
+    Theme: 'cp-am',
+    SortingStyle: '',
+    PageNo: 1,
+    PageSize: 20,
+    OrderBy: ':init',
+    IsAscOrder: true,
+    OverrideDocumentCountryCode: null,
+    ToolId: '14',
+    PrefetchPages: 100,
+    PrefetchPageStart: 1,
+    OverridenThemeName: 'cp-am',
+    ForSaleIn: '',
+    ValidateFeResearchAccess: false,
+    HasFeResearchFullAccess: false,
+    EnableSedolSearch: 'false',
+    GrsProjectId: '36800083',
+    UseCombinedOngoingChargeTER: false
+  };
+
+  const url = `https://digitalfundservice.feprecisionplus.com/FundDataService.svc/GetRowIdList?jsonString=${encodeURIComponent(JSON.stringify(params))}`;
+  const response = await fetch(url, {
+    headers: { Referer: 'https://digital.feprecisionplus.com/corppen' }
+  });
+  if (!response.ok) throw new Error('FE HTTP ' + response.status);
+
+  const raw = await response.json();
+  const units = typeof raw.Units === 'string' ? JSON.parse(raw.Units) : raw.Units;
+  const dataList = units?.DataList;
+  if (!Array.isArray(dataList)) throw new Error('FE: no DataList');
+
+  const entry = dataList.find(d => d?.Price?.CitiCode === citiCode);
+  if (!entry) throw new Error(`FE: ${citiCode} not found`);
+
+  const priceObj = entry.Price;
+  const price = priceObj?.Price?.Amount;
+  const changePct = priceObj?.Change_;
+
+  if (typeof price !== 'number' || typeof changePct !== 'number') {
+    throw new Error('FE: missing price/change data');
+  }
+
+  const prevClose = price / (1 + changePct / 100);
+  const dateStr = priceObj?.PriceDate;
+  const t = dateStr ? Math.floor(new Date(dateStr).getTime() / 1000) : Math.floor(Date.now() / 1000);
+
+  return { c: price, pc: prevClose, t };
+}
+
 // Exchange suffixes for markets that close BEFORE the US session each day.
 // At 09:10 UK the "latest close" for these has already happened this morning UK
 // time, whereas US stocks show yesterday's close - misaligning the daily move.
@@ -116,10 +189,14 @@ export default async function handler(req, res) {
 
   await Promise.all(symbolList.map(async (ticker) => {
     try {
-      result[ticker] = await fetchYahooQuote(ticker);
+      if (ticker.startsWith('FE:')) {
+        result[ticker] = await fetchFeQuote(ticker.slice(3));
+      } else {
+        result[ticker] = await fetchYahooQuote(ticker);
+      }
     } catch (e) {
       errors.push({ ticker, message: e.message });
-      console.error(`Yahoo fetch failed for ${ticker}:`, e.message);
+      console.error(`Quote fetch failed for ${ticker}:`, e.message);
       result[ticker] = null;
     }
   }));

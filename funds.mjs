@@ -30,23 +30,11 @@ export const FUNDS = {
     ]
   },
 
-  // Holdings are ETF proxies tracking the same strategies as the underlying SW
-  // unit trusts (most of which are institutional-only X/Pens share classes with
-  // no Yahoo Finance coverage). Two actual fund ISINs work directly (.L suffix).
   intl: {
     name: 'SW International CS8',
     isin: 'GB00BMRRZW41',
     holdings: [
-      { company: 'SW Global Growth (actual)',       ticker: 'GB00B7WCCL77.L' },
-      { company: 'Global Equity (Fundamental Idx)', ticker: 'IWRD.L'         },
-      { company: 'US Equity Tracker',               ticker: 'CSPX.L'         },
-      { company: 'Climate Transition World Eq',     ticker: 'SUSW.L'         },
-      { company: 'Emerging Markets',                ticker: 'EIMI.L'         },
-      { company: 'European Equity Tracker',         ticker: 'VEUR.L'         },
-      { company: 'Dev Markets Tilted Tracker',      ticker: 'HMWO.L'         },
-      { company: 'Fundamental Index EM Equity',     ticker: 'EMVL.L'         },
-      { company: 'Global Environmental Solutions',  ticker: 'INRG.L'         },
-      { company: 'UK All Share Tracker (actual)',   ticker: 'GB0031905119.L'  }
+      { company: 'SW International CS8 (NAV)', ticker: 'FE:R72O' }
     ]
   },
 
