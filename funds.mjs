@@ -61,7 +61,7 @@ export const FUNDS = {
     holdings: [
       { company: 'Nvidia',               ticker: 'NVDA' },
       { company: 'Alphabet A',           ticker: 'GOOGL' },
-      { company: 'Bank of New York Mellon', ticker: 'BK' },
+      { company: 'Bank of New York Mellon', ticker: 'BNY' },
       { company: 'Apple',                ticker: 'AAPL' },
       { company: 'Goldman Sachs',        ticker: 'GS'   },
       { company: 'Cardinal Health',      ticker: 'CAH'  },
