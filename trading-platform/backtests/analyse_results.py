@@ -45,8 +45,8 @@ def load_and_merge():
 
     # Keep only the score columns we need from the scored file
     score_cols = ["Date", "Total_Score", "Grade", "Take_Trade",
-                  "Score_TimeOfDay", "Score_RangeSize",
-                  "Score_Volume", "Score_RiskReward"]
+                  "Score_Trend", "Score_RangeATR",
+                  "Score_Strength", "Score_Volume", "Score_TimeOfDay"]
     sc = sc[score_cols]
 
     merged = bt.merge(sc, on="Date", how="inner")
