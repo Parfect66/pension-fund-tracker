@@ -270,15 +270,26 @@ async function refreshAll() {
   const ukDate = getUKDate();
 
   if (ukMinutes >= DAILY_APPLY_MINUTE) {
-    const percentages = {};
-    fundKeys.forEach((key, i) => {
-      if (fundState[key] && fundState[key].lastApplied !== ukDate && avgs[i] !== null) {
-        percentages[key] = avgs[i];
+    // Weighted portfolio change: sum(weight * fundChange) / sum(weights with data)
+    const weighted = fundKeys
+      .map((key, i) => avgs[i] !== null ? { w: FUNDS[key].weight ?? 1, v: avgs[i] } : null)
+      .filter(Boolean);
+    const totalWeight = weighted.reduce((s, x) => s + x.w, 0);
+    const portfolioChange = totalWeight > 0
+      ? weighted.reduce((s, x) => s + (x.w / totalWeight) * x.v, 0)
+      : null;
+
+    if (portfolioChange !== null) {
+      const percentages = {};
+      fundKeys.forEach((key) => {
+        if (fundState[key] && fundState[key].lastApplied !== ukDate) {
+          percentages[key] = portfolioChange;
+        }
+      });
+      if (Object.keys(percentages).length > 0) {
+        console.log('Applying weighted portfolio change:', portfolioChange.toFixed(4) + '%', percentages);
+        await applyDailyChanges(percentages);
       }
-    });
-    if (Object.keys(percentages).length > 0) {
-      console.log('Applying daily snapshot:', percentages);
-      await applyDailyChanges(percentages);
     }
   }
 

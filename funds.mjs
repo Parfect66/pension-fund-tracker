@@ -13,26 +13,10 @@
 // -----------------------------------------------------------------------------
 
 export const FUNDS = {
-  biotech: {
-    name: 'SW AXA Framlington Biotech CS8',
-    isin: '',
-    holdings: [
-      { company: 'Vertex Pharmaceuticals',    ticker: 'VRTX' },
-      { company: 'Gilead Sciences',           ticker: 'GILD' },
-      { company: 'Amgen',                     ticker: 'AMGN' },
-      { company: 'Regeneron Pharmaceuticals', ticker: 'REGN' },
-      { company: 'argenx SE',                 ticker: 'ARGX' },
-      { company: 'United Therapeutics',       ticker: 'UTHR' },
-      { company: 'Insmed',                    ticker: 'INSM' },
-      { company: 'Ionis Pharmaceuticals',     ticker: 'IONS' },
-      { company: 'Revolution Medicines',      ticker: 'RVMD' },
-      { company: 'Mirum Pharmaceuticals',     ticker: 'MIRM' }
-    ]
-  },
-
   intl: {
     name: 'SW International CS8',
     isin: 'GB00BMRRZW41',
+    weight: 0.10,
     holdings: [
       { company: 'SW International CS8 (NAV)', ticker: 'FE:R72O' }
     ]
@@ -41,6 +25,7 @@ export const FUNDS = {
   climate: {
     name: 'SW BlackRock ACS Climate Transition CS8',
     isin: 'GB00BMQDJL09',
+    weight: 0.35,
     holdings: [
       { company: 'Nvidia',            ticker: 'NVDA' },
       { company: 'Apple',             ticker: 'AAPL' },
@@ -58,6 +43,7 @@ export const FUNDS = {
   artemis: {
     name: 'SW Artemis US Select CS8',
     isin: 'GB00BMRS2P98',
+    weight: 0.35,
     holdings: [
       { company: 'Nvidia',               ticker: 'NVDA' },
       { company: 'Alphabet A',           ticker: 'GOOGL' },
@@ -75,6 +61,7 @@ export const FUNDS = {
   infra: {
     name: 'SW L&G FTSE Dev Core Infrastructure CS8',
     isin: 'GB00BMQDK398',
+    weight: 0.20,
     holdings: [
       { company: 'Nextera Energy',                   ticker: 'NEE' },
       { company: 'Union Pacific',                    ticker: 'UNP' },
