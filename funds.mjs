@@ -48,13 +48,13 @@ export const FUNDS = {
       { company: 'Nvidia',               ticker: 'NVDA' },
       { company: 'Alphabet A',           ticker: 'GOOGL' },
       { company: 'Bank of New York Mellon', ticker: 'BNY' },
-      { company: 'Apple',                ticker: 'AAPL' },
+      { company: 'AMD',                  ticker: 'AMD' },
       { company: 'Goldman Sachs',        ticker: 'GS'   },
       { company: 'Cardinal Health',      ticker: 'CAH'  },
-      { company: 'Targa Resources',      ticker: 'TRGP' },
-      { company: 'Walmart',              ticker: 'WMT'  },
-      { company: 'Broadcom',             ticker: 'AVGO' },
-      { company: 'Parker-Hannifin',      ticker: 'PH'   }
+      { company: 'MICRON TECHNOLOGY',      ticker: 'MU' },
+      { company: 'Amazon',              ticker: 'AMZN'  },
+      { company: 'JB HUNT',             ticker: 'JBHT' },
+      { company: 'ely lilly',             ticker: 'LLY'   }
     ]
   },
 
