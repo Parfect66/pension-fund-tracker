@@ -59,11 +59,11 @@ export const FUNDS = {
       { company: 'Samsung Electronics',          ticker: '005930.KS' },
       { company: 'Delta Electronics',            ticker: '2308.TW'   },
       { company: 'MediaTek',                     ticker: '2454.TW'   },
-      { company: 'HMM (HD Hyundai)',             ticker: '011200.KS' },
+      { company: 'HD Hyundai',             ticker: '329180.KS' },
       { company: 'Murata Manufacturing',         ticker: '6981.T'    },
       { company: 'Elite Material',               ticker: '2383.TW'   },
       { company: 'Accton Technology',            ticker: '2345.TW'   },
-      { company: 'AMEC',                         ticker: '688012.SS' }
+      { company: 'VeriSilicon Micro',            ticker: '688521.SS' }
     ]
   }
 };
