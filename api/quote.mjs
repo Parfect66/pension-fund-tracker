@@ -225,7 +225,13 @@ export default async function handler(req, res) {
       if (ticker.startsWith('FE:')) {
         result[ticker] = await fetchFeQuote(ticker.slice(3));
       } else if (useMarketstack(ticker)) {
-        result[ticker] = await fetchMarketstackQuote(ticker);
+        try {
+          result[ticker] = await fetchMarketstackQuote(ticker);
+        } catch (e) {
+          // Marketstack fallback: try Yahoo if Marketstack fails
+          console.warn(`Marketstack failed for ${ticker}, falling back to Yahoo:`, e.message);
+          result[ticker] = await fetchYahooQuote(ticker);
+        }
       } else {
         result[ticker] = await fetchYahooQuote(ticker);
       }
