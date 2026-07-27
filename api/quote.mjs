@@ -1,3 +1,28 @@
+// Marketstack handler for reliable Asian market data (Taiwan, Korea, Japan, Shanghai).
+// Returns last 2 trading days so we can compute prev close for % change.
+async function fetchMarketstackQuote(symbol) {
+  const key = process.env.MARKETSTACK_KEY;
+  if (!key) throw new Error('Marketstack key not configured');
+
+  const url = `https://api.marketstack.com/v2/eod?symbols=${symbol}&access_key=${key}&limit=2`;
+  const response = await fetch(url);
+  if (!response.ok) throw new Error('Marketstack HTTP ' + response.status);
+
+  const data = await response.json();
+  if (!data.data || data.data.length === 0) {
+    throw new Error(`Marketstack: no data for ${symbol}`);
+  }
+
+  const latest = data.data[0];
+  const previous = data.data.length > 1 ? data.data[1] : latest;
+
+  return {
+    c: latest.adj_close || latest.close,
+    pc: previous.adj_close || previous.close,
+    t: Math.floor(new Date(latest.date).getTime() / 1000)
+  };
+}
+
 // FE Precision Plus handler for direct NAV-based daily change.
 // Ticker format: "FE:<CitiCode>" — calls the SW pension fund portal.
 async function fetchFeQuote(citiCode) {
@@ -79,6 +104,14 @@ const ASIA_PAC_SUFFIXES = ['.AX', '.T', '.KS', '.TW', '.HK', '.SS', '.SI'];
 
 function isAsiaPacific(ticker) {
   return ASIA_PAC_SUFFIXES.some(sfx => ticker.endsWith(sfx));
+}
+
+// Tickers that should use Marketstack for reliable international data.
+// Yahoo Finance is missing recent data for these Asian exchanges.
+const MARKETSTACK_SUFFIXES = ['.TW', '.KS', '.T', '.SS'];
+
+function useMarketstack(ticker) {
+  return MARKETSTACK_SUFFIXES.some(sfx => ticker.endsWith(sfx));
 }
 
 async function fetchYahooQuote(symbol) {
@@ -191,6 +224,8 @@ export default async function handler(req, res) {
     try {
       if (ticker.startsWith('FE:')) {
         result[ticker] = await fetchFeQuote(ticker.slice(3));
+      } else if (useMarketstack(ticker)) {
+        result[ticker] = await fetchMarketstackQuote(ticker);
       } else {
         result[ticker] = await fetchYahooQuote(ticker);
       }
