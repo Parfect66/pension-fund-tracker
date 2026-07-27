@@ -23,6 +23,32 @@ async function fetchMarketstackQuote(symbol) {
   };
 }
 
+// FMP (FinancialModelingPrep) fallback for international tickers Marketstack doesn't have.
+async function fetchFmpQuote(symbol) {
+  const key = process.env.FMP_KEY;
+  if (!key) throw new Error('FMP key not configured');
+
+  const url = `https://financialmodelingprep.com/api/v3/quote/${symbol}?apikey=${key}`;
+  const response = await fetch(url);
+  if (!response.ok) throw new Error('FMP HTTP ' + response.status);
+
+  const data = await response.json();
+  if (!Array.isArray(data) || data.length === 0) {
+    throw new Error(`FMP: no data for ${symbol}`);
+  }
+
+  const quote = data[0];
+  if (!quote.price || !quote.previousClose) {
+    throw new Error(`FMP: missing price data for ${symbol}`);
+  }
+
+  return {
+    c: quote.price,
+    pc: quote.previousClose,
+    t: Math.floor(new Date(quote.timestamp * 1000).getTime() / 1000)
+  };
+}
+
 // FE Precision Plus handler for direct NAV-based daily change.
 // Ticker format: "FE:<CitiCode>" — calls the SW pension fund portal.
 async function fetchFeQuote(citiCode) {
@@ -228,9 +254,15 @@ export default async function handler(req, res) {
         try {
           result[ticker] = await fetchMarketstackQuote(ticker);
         } catch (e) {
-          // Marketstack fallback: try Yahoo if Marketstack fails
-          console.warn(`Marketstack failed for ${ticker}, falling back to Yahoo:`, e.message);
-          result[ticker] = await fetchYahooQuote(ticker);
+          try {
+            // Try FMP if Marketstack fails
+            console.warn(`Marketstack failed for ${ticker}, trying FMP:`, e.message);
+            result[ticker] = await fetchFmpQuote(ticker);
+          } catch (e2) {
+            // Final fallback: Yahoo Finance
+            console.warn(`FMP failed for ${ticker}, falling back to Yahoo:`, e2.message);
+            result[ticker] = await fetchYahooQuote(ticker);
+          }
         }
       } else {
         result[ticker] = await fetchYahooQuote(ticker);
