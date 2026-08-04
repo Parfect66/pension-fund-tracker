@@ -214,15 +214,16 @@ async function fetchYahooQuote(symbol) {
     if (pairs.length >= 4) break;
   }
 
-  if (pairs.length < 3) {
-    throw new Error('Not enough historical bars for Asia/Pacific shift');
+  if (pairs.length < 2) {
+    throw new Error('Not enough historical bars for Asia/Pacific quote');
   }
 
-  // pairs[0] = today's local close (just closed this morning UK)
-  // pairs[1] = yesterday's local close  <-- use as "current" for alignment
-  // pairs[2] = day-before-yesterday's local close  <-- use as "prev close"
-  const price = pairs[1].close;
-  const prevClose = pairs[2].close;
+  // At 09:10 UK time on a weekday:
+  // pairs[0] = today's local close (just happened this morning UK time)
+  // pairs[1] = yesterday's local close
+  // Asia holdings should show today's close vs yesterday's for accurate daily change
+  const price = pairs[0].close;
+  const prevClose = pairs[1].close;
 
   if (typeof price !== 'number' || typeof prevClose !== 'number') {
     throw new Error('Missing price data');
@@ -231,7 +232,7 @@ async function fetchYahooQuote(symbol) {
   return {
     c: price,
     pc: prevClose,
-    t: pairs[1].ts
+    t: pairs[0].ts
   };
 }
 
