@@ -13,57 +13,21 @@
 // -----------------------------------------------------------------------------
 
 export const FUNDS = {
-  climate: {
-    name: 'SW BlackRock ACS Climate Transition CS8',
-    isin: 'GB00BMQDJL09',
-    weight: 0.36,
+  gold: {
+    name: 'SW BlackRock Gold & General Pn CS8',
+    isin: 'GB00BMRS2V58',
+    weight: 1.0,
     holdings: [
-      { company: 'Nvidia',            ticker: 'NVDA' },
-      { company: 'Apple',             ticker: 'AAPL' },
-      { company: 'Microsoft',         ticker: 'MSFT' },
-      { company: 'Amazon',            ticker: 'AMZN' },
-      { company: 'Alphabet A',        ticker: 'GOOGL' },
-      { company: 'Alphabet C',        ticker: 'GOOG' },
-      { company: 'Broadcom',          ticker: 'AVGO' },
-      { company: 'Mastercard',        ticker: 'MA'   },
-      { company: 'Meta Platforms',    ticker: 'META' },
-      { company: 'Tesla',             ticker: 'TSLA' }
-    ]
-  },
-
-  artemis: {
-    name: 'SW Artemis US Select CS8',
-    isin: 'GB00BMRS2P98',
-    weight: 0.36,
-    holdings: [
-      { company: 'Nvidia',               ticker: 'NVDA' },
-      { company: 'Alphabet A',           ticker: 'GOOGL' },
-      { company: 'Bank of New York Mellon', ticker: 'BNY' },
-      { company: 'Advanced micro devices',  ticker: 'AMD' },
-      { company: 'Goldman Sachs',        ticker: 'GS'   },
-      { company: 'Cardinal Health',      ticker: 'CAH'  },
-      { company: 'MICRON TECHNOLOGY',      ticker: 'MU' },
-      { company: 'Amazon.com inc',       ticker: 'AMZN'  },
-      { company: 'JB HUNT',             ticker: 'JBHT' },
-      { company: 'ely lilly',             ticker: 'LLY'   }
-    ]
-  },
-
-  veritas: {
-    name: 'SW Veritas Asian Pn CS8',
-    isin: 'GB00BMRS3K19',
-    weight: 0.28,
-    holdings: [
-      { company: 'Taiwan Semiconductor',         ticker: '2330.TW'   },
-      { company: 'SK hynix',                     ticker: '000660.KS' },
-      { company: 'Samsung Electronics',          ticker: '005930.KS' },
-      { company: 'Delta Electronics',            ticker: '2308.TW'   },
-      { company: 'MediaTek',                     ticker: '2454.TW'   },
-      { company: 'HD Hyundai',             ticker: '329180.KS' },
-      { company: 'Murata Manufacturing',         ticker: '6981.T'    },
-      { company: 'Elite Material',               ticker: '2383.TW'   },
-      { company: 'Accton Technology',            ticker: '2345.TW'   },
-      { company: 'VeriSilicon Micro',            ticker: '688521.SS' }
+      { company: 'Barrick Gold Corp',      ticker: 'ABX.TO' },
+      { company: 'Agnico Eagle Mines',     ticker: 'AEM.TO' },
+      { company: 'Newmont Corporation',    ticker: 'NEM'    },
+      { company: 'Wheaton Precious Metals', ticker: 'WPM.TO' },
+      { company: 'AngloGold Ashanti',      ticker: 'AU'     },
+      { company: 'Franco-Nevada Corp',     ticker: 'FNV.TO' },
+      { company: 'Northern Star Resources', ticker: 'NST.AX' },
+      { company: 'Endeavour Mining',       ticker: 'EDV.TO' },
+      { company: 'Kinross Gold Corp',      ticker: 'KGC'    },
+      { company: 'Alamos Gold Inc',        ticker: 'AGI.TO' }
     ]
   }
 };
