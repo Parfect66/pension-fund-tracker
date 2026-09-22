@@ -13,21 +13,21 @@
 // -----------------------------------------------------------------------------
 
 export const FUNDS = {
-  gold: {
-    name: 'SW BlackRock Gold & General Pn CS8',
-    isin: 'GB00BMRS2V58',
+  pacific: {
+    name: 'SW iShares Pacific ex Japan Equity Index CS8',
+    isin: 'GB00BMQDJG55',
     weight: 1.0,
     holdings: [
-      { company: 'Barrick Gold Corp',      ticker: 'ABX.TO' },
-      { company: 'Agnico Eagle Mines',     ticker: 'AEM.TO' },
-      { company: 'Newmont Corporation',    ticker: 'NEM'    },
-      { company: 'Wheaton Precious Metals', ticker: 'WPM.TO' },
-      { company: 'AngloGold Ashanti',      ticker: 'AU'     },
-      { company: 'Franco-Nevada Corp',     ticker: 'FNV.TO' },
-      { company: 'Northern Star Resources', ticker: 'NST.AX' },
-      { company: 'Endeavour Mining',       ticker: 'EDV.TO' },
-      { company: 'Kinross Gold Corp',      ticker: 'KGC'    },
-      { company: 'Alamos Gold Inc',        ticker: 'AGI.TO' }
+      { company: 'Taiwan Semiconductor Manufacturing', ticker: '2330.TW' },
+      { company: 'Samsung Electronics',                 ticker: '005930.KS' },
+      { company: 'SK Hynix',                           ticker: '000660.KS' },
+      { company: 'BHP Group',                          ticker: 'BHP.AX' },
+      { company: 'Commonwealth Bank of Australia',     ticker: 'CBA.AX' },
+      { company: 'MediaTek',                           ticker: '2454.TW' },
+      { company: 'DBS Group Holdings',                 ticker: 'D05.SG' },
+      { company: 'Delta Electronics',                  ticker: '2308.TW' },
+      { company: 'Samsung Electronics (Non-Voting)',   ticker: '005380.KS' },
+      { company: 'AIA Group',                          ticker: '1299.HK' }
     ]
   }
 };
