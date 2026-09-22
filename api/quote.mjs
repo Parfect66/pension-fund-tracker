@@ -128,13 +128,18 @@ async function fetchFeQuote(citiCode) {
 // We shift these back by one bar so the move matches the same trading window.
 const ASIA_PAC_SUFFIXES = ['.AX', '.T', '.KS', '.TW', '.HK', '.SS', '.SI'];
 
+// Tickers that should use previous day's close (shift back 2 bars instead of 1).
+// NST.AX specifically needs this because at 09:10 UK snapshot time, we want to
+// capture the "previous close" from Aussie perspective, not today's price.
+const PREV_CLOSE_ONLY = ['NST.AX'];
+
 function isAsiaPacific(ticker) {
   return ASIA_PAC_SUFFIXES.some(sfx => ticker.endsWith(sfx));
 }
 
 // Tickers that should use Marketstack for reliable international data.
-// Yahoo Finance is missing recent data for these Asian exchanges.
-const MARKETSTACK_SUFFIXES = ['.TW', '.KS', '.T', '.SS'];
+// Note: Taiwan (.TW) uses Yahoo instead - Marketstack is delayed, Yahoo has current data
+const MARKETSTACK_SUFFIXES = ['.KS', '.T', '.SS'];
 
 function useMarketstack(ticker) {
   return MARKETSTACK_SUFFIXES.some(sfx => ticker.endsWith(sfx));
@@ -214,16 +219,30 @@ async function fetchYahooQuote(symbol) {
     if (pairs.length >= 4) break;
   }
 
-  if (pairs.length < 2) {
-    throw new Error('Not enough historical bars for Asia/Pacific quote');
+  // Check if this ticker needs previous close (shift back 2 bars)
+  const usePrevCloseOnly = PREV_CLOSE_ONLY.includes(symbol);
+  const minBarsNeeded = usePrevCloseOnly ? 3 : 2;
+
+  if (pairs.length < minBarsNeeded) {
+    throw new Error(`Not enough historical bars for ${symbol} quote`);
   }
 
   // At 09:10 UK time on a weekday:
   // pairs[0] = today's local close (just happened this morning UK time)
   // pairs[1] = yesterday's local close
-  // Asia holdings should show today's close vs yesterday's for accurate daily change
-  const price = pairs[0].close;
-  const prevClose = pairs[1].close;
+  // pairs[2] = day-before's local close
+  // For NST.AX, use yesterday's close as the price (pair[1]) vs day-before (pairs[2])
+  let price, prevClose, timestamp;
+
+  if (usePrevCloseOnly) {
+    price = pairs[1].close;
+    prevClose = pairs[2].close;
+    timestamp = pairs[1].ts;
+  } else {
+    price = pairs[0].close;
+    prevClose = pairs[1].close;
+    timestamp = pairs[0].ts;
+  }
 
   if (typeof price !== 'number' || typeof prevClose !== 'number') {
     throw new Error('Missing price data');
@@ -232,7 +251,7 @@ async function fetchYahooQuote(symbol) {
   return {
     c: price,
     pc: prevClose,
-    t: pairs[0].ts
+    t: timestamp
   };
 }
 
