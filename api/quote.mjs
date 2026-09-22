@@ -294,6 +294,21 @@ export default async function handler(req, res) {
     }
   }));
 
+  // Fix previousClose from series if API's previousClose field is stale (Yahoo issue).
+  for (const ticker in result) {
+    const quote = result[ticker];
+    if (quote && quote.c && typeof quote.pc === 'number') {
+      // If we have series data, use the second-to-last close if it's closer to current price
+      if (Array.isArray(quote.series) && quote.series.length >= 2) {
+        const seriesPrevClose = quote.series[quote.series.length - 2];
+        if (typeof seriesPrevClose === 'number' &&
+            Math.abs((quote.c - seriesPrevClose) / seriesPrevClose) < 0.2) {
+          quote.pc = seriesPrevClose;
+        }
+      }
+    }
+  }
+
   res.setHeader('Cache-Control', 's-maxage=300');
   return res.status(200).json(debug ? { result, errors } : result);
 }
