@@ -24,7 +24,7 @@ export const FUNDS = {
       { company: 'BHP Group',                          ticker: 'BHP.AX' },
       { company: 'Commonwealth Bank of Australia',     ticker: 'CBA.AX' },
       { company: 'MediaTek',                           ticker: '2454.TW' },
-      { company: 'DBS Group Holdings',                 ticker: 'D05.SG' },
+      { company: 'DBS Group Holdings',                 ticker: 'D05.SI' },
       { company: 'Delta Electronics',                  ticker: '2308.TW' },
       { company: 'Samsung Electronics (Non-Voting)',   ticker: '005380.KS' },
       { company: 'AIA Group',                          ticker: '1299.HK' }
