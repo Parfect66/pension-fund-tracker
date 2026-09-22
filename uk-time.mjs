@@ -11,10 +11,10 @@
 // the server runs in UTC and the frontend runs wherever the browser is.
 // -----------------------------------------------------------------------------
 
-// 09:10 UK - after all Asian markets have closed.
-export const DAILY_APPLY_MINUTE = 9 * 60 + 10;
+// 09:00 UK - after all Asian markets have closed.
+export const DAILY_APPLY_MINUTE = 9 * 60;
 
-// "09:10" - for UI hints and error messages.
+// "09:00" - for UI hints and error messages.
 export const DAILY_APPLY_LABEL =
   String(Math.floor(DAILY_APPLY_MINUTE / 60)).padStart(2, '0') + ':' +
   String(DAILY_APPLY_MINUTE % 60).padStart(2, '0');
